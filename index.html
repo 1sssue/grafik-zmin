@@ -270,6 +270,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .fti{display:flex;align-items:center;gap:6px;margin-bottom:6px}.fti input{flex:1}
 .ftrow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
 .ftrow input{width:64px;text-align:center}
+.ov{backdrop-filter:blur(6px)}
+.ftmodal{width:min(640px,100%)}
+.ftbar{display:flex;justify-content:center;padding:4px 0 28px}
+.ftadd{display:flex;gap:8px;align-items:center}
+.zbk{position:fixed;inset:0;z-index:55;background:rgba(10,14,28,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card.zoom{position:fixed!important;inset:5vh 6vw!important;z-index:60;width:auto!important;height:auto!important;max-height:none!important;flex:none!important;overflow:auto!important;box-shadow:0 30px 100px rgba(0,0,0,.45)}
+.card.side.zoom{overflow:hidden!important}
+.zbtn{margin-left:auto;flex:none}
+.tdin{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tdin label{width:auto}
+.tdin input{width:100%}
 /* modals */
 .ov{position:fixed;inset:0;background:rgba(10,14,28,.5);z-index:50;display:grid;place-items:center;padding:16px}
 .ov[hidden]{display:none}
@@ -375,17 +386,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div id="tdOt"></div>
       <button class="btn primary" id="tdSave" type="button" style="justify-content:center">Зберегти</button>
     </div></aside>
-    <aside class="card ftcard" id="ftCard" hidden><div class="today-in">
-      <div class="bh"><h2>Вільний час</h2><input type="date" id="ftDate" class="ftdate"></div>
-      <div id="ftIv"></div>
-      <div class="ftrow"><button class="btn ghost sm" id="ftAdd" type="button">+ інтервал</button><label>або хвилин <input type="number" min="0" inputmode="numeric" id="ftMin" placeholder="0"></label></div>
-      <div class="stat"><small>Вільного часу за день</small><b id="ftTot">0 хв</b></div>
-    </div></aside>
+
 
 
     <aside class="card side" aria-label="Закриті чати"><div class="side-in">
       <div class="sidehead">
         <div><h2>Закрито чатів</h2><div class="big" style="margin-top:6px"><b id="sumN">0</b><span id="sumLbl">за місяць</span></div></div>
+        <button class="btn ghost sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
       </div>
       <div class="stats">
         <div class="stat"><small>Середнє на день</small><b id="avgN">—</b></div>
@@ -406,6 +413,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button class="btn sm" id="todayBtn" type="button" style="margin-left:6px">Сьогодні</button>
         <span class="spacer"></span>
         <button class="btn primary sm" id="upBtn" type="button"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"/></svg><span class="lblt">Додати файл</span></button>
+        <button class="btn ghost sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
       </div>
       <div id="note"></div>
       <div class="legend" id="legend"></div>
@@ -418,6 +426,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <section class="card blk" id="otCard" aria-label="Перепрацювання">
       <div class="bh">
         <div><h2>Перепрацювання</h2><div class="sub2" id="otMonth"></div></div>
+        <button class="btn ghost sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
         <div class="popwrap"><button class="btn sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div>
       </div>
       <div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div>
@@ -440,6 +449,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     </section>
     </div></div>
   </div>
+  <div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button></div>
 </main>
 
 <!-- people -->
@@ -487,6 +497,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="mh"><h3 id="mt5">Адмін-панель <button class="btn ghost sm" id="admClose" type="button" aria-label="Закрити">✕</button></h3></div>
     <p class="hint">Користувачі, які вже входили. Для кожного можна видати або забрати доступ до блоку «Вільний час». Адміністратори задаються в базі даних.</p>
     <div class="mb" id="admList"></div>
+  </div>
+</div>
+<div class="zbk" id="zbk" hidden></div>
+<div class="ov" id="ov6" hidden>
+  <div class="modal ftmodal" role="dialog" aria-modal="true" aria-labelledby="mt6">
+    <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
+    <div class="gbody">
+      <div class="otsum"><div><small>Всього за місяць</small><b id="ftSumM">0</b></div><div><small>Середнє за день <span id="ftCnt"></span></small><b id="ftAvg">—</b></div></div>
+      <div class="ftadd"><input type="date" id="ftDate" class="ftdate"><button class="btn primary sm" id="ftAddDay" type="button">+ Додати день</button></div>
+    </div>
+    <div class="mb" id="ftList"></div>
   </div>
 </div>
 <!-- settings -->
@@ -672,7 +693,7 @@ function calcPay(){
   for(let d=1;d<=daysIn(S.view);d++){const c=p.sh[S.view+'-'+pad(d)];if(c&&c.k==='work'){const h=shiftHours(c,p);if(d<=15){h1+=h;n1++}else{h2+=h;n2++}}}
   const r=rate(),base1=h1*r,base2=h2*r,pct=rankPct(),bonus=(base1+base2)*pct/100;
   let oh=0,om=0;otDates().forEach(d=>{oh+=otHours(S.ot[d]);om+=otMoney(S.ot[d])});
-  let qs=0,qh=0;for(let d=1;d<=daysIn(S.view);d++){const k=S.view+'-'+pad(d),v=chTotal(CH()[k]);if(v){qs+=v;qh+=dayHours(k)}}
+  let qs=0,qh=0;for(let d=1;d<=daysIn(S.view);d++){const k=S.view+'-'+pad(d),v=chTotal(CH()[k]);if(v){const hh=dayHours(k);if(hh>0){qs+=v;qh+=hh}}}
   const qOn=!!S.qb[S.view],qAvg=qh?qs/qh:0,qExtra=qOn&&qAvg>9?qs-9*qh:0,qMoney=qExtra*QB;
   return {h1,h2,n1,n2,base1,base2,pct,bonus,oh,om,qOn,qAvg,qExtra,qMoney,sal:base2+bonus+om+qMoney,adv:base1,total:base1+base2+bonus+om+qMoney};
 }
@@ -722,15 +743,16 @@ function refreshChats(){
     const t=vals[i];row.title=t?'Підсумок (без відкладених): '+t:'';
     row.querySelector('.bar').style.width=(Math.max(0,t)/max*100)+'%';
   });
-  const sum=vals.reduce((a,b)=>a+b,0),filled=vals.map((v,i)=>({v,d:i+1})).filter(x=>x.v!==0);
+  const sum=vals.reduce((a,b)=>a+b,0),all=vals.map((v,i)=>({v,d:i+1})).filter(x=>x.v!==0);
+  const filled=all.filter(x=>dayHours(S.view+'-'+pad(x.d))>0),ws=filled.reduce((a,x)=>a+x.v,0);
   $('sumN').textContent=sum;
-  $('avgN').textContent=filled.length?fmtN(sum/filled.length):'—';
-  const hrs=filled.reduce((a,x)=>a+dayHours(S.view+'-'+pad(x.d)),0),diff=sum-nrate(S.view)*hrs;
-  $('avgH').textContent=hrs?fmtN(sum/hrs):'—';
+  $('avgN').textContent=filled.length?fmtN(ws/filled.length):'—';
+  const hrs=filled.reduce((a,x)=>a+dayHours(S.view+'-'+pad(x.d)),0),diff=ws-nrate(S.view)*hrs;
+  $('avgH').textContent=hrs?fmtN(ws/hrs):'—';
   const nb=$('normBox');nb.classList.toggle('ok',filled.length>0&&diff>0);nb.classList.toggle('lack',filled.length>0&&diff<0);
   $('normL').textContent=diff>0?'Перевиконано норму':'До норми ('+fmtN(nrate(S.view))+'/год)';
   $('normN').textContent=!filled.length?'—':diff>0?'+'+fmtN(diff)+' чатів':diff<0?fmtN(-diff)+' чатів':'норму виконано';
-  const best=[...filled].sort((a,b)=>b.v-a.v)[0];
+  const best=[...all].sort((a,b)=>b.v-a.v)[0];
   $('bestN').textContent=best&&best.v>0?best.v+' · '+pad(best.d)+'.'+S.view.slice(5):'—';
 }
 
@@ -964,7 +986,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-info]');if
 const NORM=7.5,QB=7;
 const nrate=ym=>S.qb[ym]?9:7.5;
 const fmtN=v=>(Math.round(v*10)/10).toString().replace('.',',');
-function dayBase(d){const p=S.main?personAt(S.main,d):null,c=p&&p.sh[d];return c&&c.k==='work'?shiftHours(c,p):8}
+function dayBase(d){const p=S.main?personAt(S.main,d):null,c=p&&p.sh[d];return c&&c.k==='work'?shiftHours(c,p):(p?0:8)}
 const otOf=d=>S.main&&S.ot[d]?otHours(S.ot[d]):0;
 const dayHours=d=>dayBase(d)+otOf(d);
 function renderToday(){
@@ -982,11 +1004,11 @@ function renderToday(){
 }
 function refreshToday(){
   const d=todayStr(),n=Math.max(0,Math.floor(+$('tdN').value)||0),p=Math.max(0,Math.floor(+$('tdP').value)||0);
-  const nr=nrate(d.slice(0,7)),net=n-p,h=dayBase(d),oh=otOf(d),norm=nr*(h+oh),diff=net-norm;
+  const nr=nrate(d.slice(0,7)),net=n-p,h=dayBase(d),oh=otOf(d),norm=nr*(h+oh),diff=net-norm,off=h+oh===0;
   $('tdOt').innerHTML=oh>0?`<div class="stat"><small>На перепрацювання · +${fmtN(oh)} год</small><b>${fmtN(nr*oh)} чатів</b></div>`:'';
   $('tdRes').innerHTML=`<div class="stat"><small title="Без відкладених">Закрито</small><b>${net}</b></div>
     <div class="stat"><small title="${fmtN(h+oh)} год × ${fmtN(nr)}">Норма ${fmtN(nr)}/год</small><b>${fmtN(norm)}</b></div>
-    <div class="stat ${diff>0?'ok':diff<0?'lack':''}"><small>${diff>0?'Перевиконано':diff<0?'До норми':'Норма ✓'}</small><b>${diff>0?'+'+fmtN(diff):diff<0?fmtN(-diff):'0'}</b></div>`;
+    <div class="stat ${off?'':diff>0?'ok':diff<0?'lack':''}"><small>${off?'Вихідний':diff>0?'Перевиконано':diff<0?'До норми':'Норма ✓'}</small><b>${off?'—':diff>0?'+'+fmtN(diff):diff<0?fmtN(-diff):'0'}</b></div>`;
 }
 $('todayCard').addEventListener('input',refreshToday);
 $('tdSave').onclick=()=>{
@@ -1041,8 +1063,7 @@ async function enter(user){
   if(st&&st.data&&st.data.meta)applyCloud(st.data);
   READY=true;if(!(st&&st.data&&st.data.meta))cloudPush();
   $('gate').hidden=true;$('meMail').textContent=ME.email;$('meMail').hidden=false;$('outBtn').hidden=false;
-  $('admBtn').hidden=ME.role!=='admin';$('ftCard').hidden=!(ME.role==='admin'||ME.can_free_time);
-  $('ftDate').value=todayStr();renderFt();
+  $('admBtn').hidden=ME.role!=='admin';$('ftOpen').hidden=!(ME.role==='admin'||ME.can_free_time);
 }
 $('outBtn').onclick=async()=>{await sb.auth.signOut();clearLocal();localStorage.removeItem('shifts.owner');location.reload()};
 /* admin */
@@ -1057,18 +1078,35 @@ $('admList').addEventListener('change',async e=>{const t=e.target;if(!t.dataset.
   const{error}=await sb.from('profiles').update({can_free_time:t.checked}).eq('id',t.dataset.uid);
   if(error){toast('Не вдалося змінити: '+error.message);t.checked=!t.checked}else toast(t.checked?'Доступ надано':'Доступ прибрано')});
 /* free time */
-const fmtMin=m=>m>=60?Math.floor(m/60)+' год '+(m%60?m%60+' хв':''):m+' хв';
+const fmtMin=m=>m>=60?Math.floor(m/60)+' год'+(m%60?' '+m%60+' хв':''):m+' хв';
 const ftMinutes=e=>{let t=+e.m||0;e.iv.forEach(i=>{const a=parseT(i.a),b=parseT(i.b);if(a!=null&&b!=null)t+=(b-a+1440)%1440});return t};
-function ftEntry(){const d=$('ftDate').value;return S.ft[d]||(S.ft[d]={iv:[],m:0})}
-function ftSave(){const d=$('ftDate').value,e=S.ft[d];if(e&&!e.iv.length&&!e.m)delete S.ft[d];saveMeta();$('ftTot').textContent=fmtMin(ftMinutes(S.ft[d]||{iv:[],m:0}))}
-function renderFt(){const e=S.ft[$('ftDate').value]||{iv:[],m:0};
-  $('ftIv').innerHTML=e.iv.map((i,k)=>`<div class="fti"><input type="time" data-k="${k}" data-f="a" value="${i.a}"><span>–</span><input type="time" data-k="${k}" data-f="b" value="${i.b}"><button class="btn ghost sm" type="button" data-del="${k}" aria-label="Видалити">✕</button></div>`).join('');
-  $('ftMin').value=e.m||'';$('ftTot').textContent=fmtMin(ftMinutes(e))}
-$('ftDate').onchange=renderFt;
-$('ftAdd').onclick=()=>{ftEntry().iv.push({a:'',b:''});renderFt()};
-$('ftMin').oninput=e=>{ftEntry().m=Math.max(0,Math.floor(+e.target.value)||0);ftSave()};
-$('ftIv').addEventListener('input',e=>{const t=e.target;if(t.dataset.k==null)return;ftEntry().iv[+t.dataset.k][t.dataset.f]=t.value;ftSave()});
-$('ftIv').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;ftEntry().iv.splice(+b.dataset.del,1);ftSave();renderFt()});
+const ftDays=()=>Object.keys(S.ft).filter(d=>d.startsWith(S.view)).sort();
+function ftSummary(){const ds=ftDays(),t=ds.reduce((a,d)=>a+ftMinutes(S.ft[d]),0);$('ftSumM').textContent=fmtMin(t);$('ftAvg').textContent=ds.length?fmtMin(Math.round(t/ds.length)):'—';$('ftCnt').textContent=ds.length?'· '+ds.length+' дн.':''}
+function renderFt(){
+  $('ftMonth').textContent=monthName(S.view);
+  $('ftList').innerHTML=ftDays().map(d=>{const e=S.ft[d];
+    const ivs=e.iv.map((i,k)=>`<span class="iv"><input type="time" data-fa="${k}" value="${i.a}" aria-label="Початок"><span>–</span><input type="time" data-fb="${k}" value="${i.b}" aria-label="Кінець"><button type="button" data-fid="${k}" aria-label="Прибрати інтервал">✕</button></span>`).join('');
+    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-t>${fmtMin(ftMinutes(e))}</div><div class="otm">вільний час</div></div><button class="btn ghost sm otdel" type="button" data-fdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-fadd>+ інтервал</button></div><label class="otx" style="width:auto">або хв <input type="number" min="0" inputmode="numeric" data-fm value="${e.m||''}" style="width:64px"></label></div></div>`}).join('')||'<p class="empty-note">За цей місяць записів ще немає.</p>';
+  ftSummary();
+}
+$('ftList').addEventListener('input',e=>{const t=e.target,row=t.closest('.otr');if(!row)return;const en=S.ft[row.dataset.d];if(!en)return;
+  if(t.dataset.fa!=null)en.iv[+t.dataset.fa].a=t.value;else if(t.dataset.fb!=null)en.iv[+t.dataset.fb].b=t.value;else if(t.dataset.fm!=null)en.m=Math.max(0,Math.floor(+t.value)||0);else return;
+  saveMeta();row.querySelector('[data-t]').textContent=fmtMin(ftMinutes(en));ftSummary()});
+$('ftList').addEventListener('click',e=>{const row=e.target.closest('.otr');if(!row)return;const d=row.dataset.d,en=S.ft[d];if(!en)return;
+  if(e.target.closest('[data-fdel]'))delete S.ft[d];
+  else if(e.target.closest('[data-fadd]'))en.iv.push({a:'',b:''});
+  else{const b=e.target.closest('[data-fid]');if(!b)return;en.iv.splice(+b.dataset.fid,1)}
+  saveMeta();renderFt()});
+$('ftAddDay').onclick=()=>{const d=$('ftDate').value;if(!d||!d.startsWith(S.view)){toast('Оберіть день у місяці: '+monthName(S.view).toLowerCase());return}if(!S.ft[d])S.ft[d]={iv:[{a:'',b:''}],m:0};saveMeta();renderFt()};
+$('ftOpen').onclick=()=>{const td=todayStr();$('ftDate').min=S.view+'-01';$('ftDate').max=S.view+'-'+pad(daysIn(S.view));$('ftDate').value=td.startsWith(S.view)?td:S.view+'-01';$('ov6').hidden=false;renderFt()};
+const ftClose=()=>{$('ov6').hidden=true};
+$('ftClose').onclick=ftClose;$('ov6').addEventListener('mousedown',e=>{if(e.target===$('ov6'))ftClose()});
+/* zoom a block to focus on it */
+let zoomEl=null;
+function zoomOff(){if(!zoomEl)return;zoomEl.classList.remove('zoom');zoomEl.querySelector('.zbtn').textContent='⤢';zoomEl=null;$('zbk').hidden=true;document.body.style.overflow=''}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-zoom]');if(!b)return;const el=b.closest('.card');if(el===zoomEl){zoomOff();return}zoomOff();zoomEl=el;el.classList.add('zoom');b.textContent='✕';$('zbk').hidden=false;document.body.style.overflow='hidden'});
+$('zbk').onclick=zoomOff;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){zoomOff();ftClose()}});
 $('qbChk').onchange=e=>{S.qb[S.view]=e.target.checked;saveMeta();renderSalary();refreshToday();refreshChats()};
 
 $('rate').value=S.rate!=null?S.rate:(S.demo?140:'');
