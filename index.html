@@ -304,6 +304,23 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
   main.wrap>.layout{height:auto}
   .ftbar{padding-bottom:20px}
 }
+/* round 7 */
+.cal,.blk,.today{position:relative}
+.btn.zbtn{position:absolute;top:10px;right:10px;margin:0;z-index:3;width:32px;height:32px;padding:0;font-size:16px;line-height:1;justify-content:center;background:#7a5af8;border-color:#7a5af8;color:#fff}
+.btn.zbtn:hover{background:#6a49e8;border-color:#6a49e8}
+.calhead,.sidehead,#otCard .bh{padding-right:44px}
+.inputs{grid-template-columns:minmax(120px,1fr) minmax(0,1.5fr);align-items:end}
+.inputs .fld{height:40px}
+.otfoot{justify-content:space-between;align-items:center}
+.otfoot .ivs{flex:1 1 auto}
+.otfoot .otx{margin-left:auto}
+.ftmodal{overflow:visible}
+.ftmodal .mb{min-height:260px}
+.ent{--eb:color-mix(in srgb,var(--c) 24%,var(--surface));background:var(--eb);color:var(--fg);color:lch(from var(--eb) clamp(14,(56 - l)*1000,96) 0 0)}
+.ent.mainu{--eb:color-mix(in srgb,var(--c) 42%,var(--surface));background:var(--eb)}
+.ent.none{--eb:var(--surface)}
+.ent .n{color:inherit}
+.ent.off .t,.ent.none .t{color:inherit;opacity:.7}
 /* modals */
 .ov{position:fixed;inset:0;background:rgba(10,14,28,.5);z-index:50;display:grid;place-items:center;padding:16px}
 .ov[hidden]{display:none}
@@ -453,8 +470,6 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
       </div>
       <div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div>
       <div class="otlist" id="otList"></div>
-      <div class="foot" id="otFoot" hidden>Сума = години × ставка × кратність (наприклад 1.5). Кінець інтервалу кратний годині від початку.</div>
-      <div><button class="btn ghost sm" type="button" data-info="otFoot" aria-expanded="false">ⓘ Підказка</button></div>
     </section>
 
 
@@ -466,8 +481,6 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
       </div>
       <label class="chk"><input type="checkbox" id="qbChk"> Вихожу на доплату по кількісному</label>
       <div id="payCalc"></div>
-      <div class="foot" id="payFoot" hidden>Години зміни беруться з колонки «Зміна» у файлі (наприклад 8 годин) або з інтервалу, якщо він вказаний у клітинці. Вихідні, відпустка й лікарняний не оплачуються.</div>
-      <div><button class="btn ghost sm" type="button" data-info="payFoot" aria-expanded="false">ⓘ Підказка</button></div>
     </section>
     </div></div>
   </div>
@@ -527,7 +540,7 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
     <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
     <div class="gbody">
       <div class="otsum"><div><small>Всього за місяць</small><b id="ftSumM">0</b></div><div><small>Середнє за день <span id="ftCnt"></span></small><b id="ftAvg">—</b></div></div>
-      <div class="ftadd"><input type="date" id="ftDate" class="ftdate"><button class="btn primary sm" id="ftAddDay" type="button">+ Додати день</button></div>
+      <div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="ftAddDay" type="button">+ Додати день</button><div class="pop" id="ftPop" hidden></div></div></div>
     </div>
     <div class="mb" id="ftList"></div>
   </div>
@@ -729,12 +742,12 @@ function renderSalary(){
   const hint=rate()?'':'<p class="empty-note">Вкажіть ставку за годину, щоб побачити суми.</p>';
   $('payCalc').innerHTML=hint+
    `<div class="pr"><div><b>Зміни 1–15</b><small>${c.n1} змін · ${fmtH(c.h1)}</small></div><span>${money(c.base1)}</span></div>
-    <div class="pr sum"><div><b>Аванс</b><small>${fd(pd.adv)}</small></div><span>${money(c.adv)}</span></div>
+    <div class="pr sum"><div><b>Аванс</b><small>виплата ${fdm(S.view,pd.adv)}</small></div><span>${money(c.adv)}</span></div>
     <div class="pr"><div><b>Зміни 16–${last}</b><small>${c.n2} змін · ${fmtH(c.h2)}</small></div><span>${money(c.base2)}</span></div>
     <div class="pr"><div><b>Премія ${c.pct}%</b><small>від усіх змін місяця (${money(c.base1+c.base2)})</small></div><span>${money(c.bonus)}</span></div>
     <div class="pr"><div><b>Перепрацювання</b><small>${fmtH(c.oh)}</small></div><span>${money(c.om)}</span></div>
     ${c.qOn?`<div class="pr"><div><b>Доплата за кількісний</b><small>середнє ${fmtN(c.qAvg)} чат/год${c.qAvg>9?` · +${fmtN(c.qExtra)} чатів × ${QB}`:' · потрібно понад 9'}</small></div><span>${money(c.qMoney)}</span></div>`:''}
-    <div class="pr sum"><div><b>Зарплата</b><small>${fd(pd.sal)}</small></div><span>${money(c.sal)}</span></div>
+    <div class="pr sum"><div><b>Зарплата</b><small>виплата ${fdm(nextYM(S.view),payDates(nextYM(S.view)).sal)}</small></div><span>${money(c.sal)}</span></div>
     <div class="total"><small>Загальна сума</small><b>${money(c.total)}</b></div>
     `;
 }
@@ -1003,7 +1016,6 @@ addEventListener('dragleave',e=>{dragN--;if(dragN<=0){dragN=0;$('drop').hidden=t
 addEventListener('dragover',e=>e.preventDefault());
 addEventListener('drop',e=>{e.preventDefault();dragN=0;$('drop').hidden=true;[...(e.dataTransfer?e.dataTransfer.files:[])].forEach(readFile)});
 
-document.addEventListener('click',e=>{const b=e.target.closest('[data-info]');if(!b)return;const f=$(b.dataset.info);f.hidden=!f.hidden;b.setAttribute('aria-expanded',String(!f.hidden))});
 const NORM=7.5,QB=7;
 const nrate=ym=>S.qb[ym]?9:7.5;
 const fmtN=v=>(Math.round(v*10)/10).toString().replace('.',',');
@@ -1098,6 +1110,8 @@ $('admClose').onclick=()=>{$('ov5').hidden=true};
 $('admList').addEventListener('change',async e=>{const t=e.target;if(!t.dataset.uid)return;
   const{error}=await sb.from('profiles').update({can_free_time:t.checked}).eq('id',t.dataset.uid);
   if(error){toast('Не вдалося змінити: '+error.message);t.checked=!t.checked}else toast(t.checked?'Доступ надано':'Доступ прибрано')});
+const nextYM=ym=>{const y=+ym.slice(0,4),m=+ym.slice(5);return m===12?(y+1)+'-01':y+'-'+pad(m+1)};
+const fdm=(ym,o)=>WD[dowOf(ym+'-'+pad(o.day))]+' '+pad(o.day)+'.'+ym.slice(5)+(ym.slice(0,4)!==S.view.slice(0,4)?'.'+ym.slice(0,4):'');
 /* free time */
 const fmtMin=m=>m>=60?Math.floor(m/60)+' год'+(m%60?' '+m%60+' хв':''):m+' хв';
 const ftMinutes=e=>{let t=+e.m||0;e.iv.forEach(i=>{const a=parseT(i.a),b=parseT(i.b);if(a!=null&&b!=null)t+=(b-a+1440)%1440});return t};
@@ -1107,7 +1121,7 @@ function renderFt(){
   $('ftMonth').textContent=monthName(S.view);
   $('ftList').innerHTML=ftDays().map(d=>{const e=S.ft[d];
     const ivs=e.iv.map((i,k)=>`<span class="iv"><input type="time" data-fa="${k}" value="${i.a}" aria-label="Початок"><span>–</span><input type="time" data-fb="${k}" value="${i.b}" aria-label="Кінець"><button type="button" data-fid="${k}" aria-label="Прибрати інтервал">✕</button></span>`).join('');
-    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-t>${fmtMin(ftMinutes(e))}</div><div class="otm">вільний час</div></div><button class="btn ghost sm otdel" type="button" data-fdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-fadd>+ інтервал</button></div><label class="otx" style="width:auto">або хв <input type="number" min="0" inputmode="numeric" data-fm value="${e.m||''}" style="width:64px"></label></div></div>`}).join('')||'<p class="empty-note">За цей місяць записів ще немає.</p>';
+    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-t>${fmtMin(ftMinutes(e))}</div><div class="otm">вільний час</div></div><button class="btn ghost sm otdel" type="button" data-fdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-fadd>+ інтервал</button></div></div></div>`}).join('')||'<p class="empty-note">За цей місяць записів ще немає.</p>';
   ftSummary();
 }
 $('ftList').addEventListener('input',e=>{const t=e.target,row=t.closest('.otr');if(!row)return;const en=S.ft[row.dataset.d];if(!en)return;
@@ -1118,8 +1132,14 @@ $('ftList').addEventListener('click',e=>{const row=e.target.closest('.otr');if(!
   else if(e.target.closest('[data-fadd]'))en.iv.push({a:'',b:''});
   else{const b=e.target.closest('[data-fid]');if(!b)return;en.iv.splice(+b.dataset.fid,1)}
   saveMeta();renderFt()});
-$('ftAddDay').onclick=()=>{const d=$('ftDate').value;if(!d||!d.startsWith(S.view)){toast('Оберіть день у місяці: '+monthName(S.view).toLowerCase());return}if(!S.ft[d])S.ft[d]={iv:[{a:'',b:''}],m:0};saveMeta();renderFt()};
-$('ftOpen').onclick=()=>{const td=todayStr();$('ftDate').min=S.view+'-01';$('ftDate').max=S.view+'-'+pad(daysIn(S.view));$('ftDate').value=td.startsWith(S.view)?td:S.view+'-01';$('ov6').hidden=false;renderFt()};
+function renderFtPop(){const first=S.view+'-01',lead=(dowOf(first)+6)%7,n=daysIn(S.view);
+  let h=`<h4>${monthName(S.view)}</h4><div class="mini">`+['Пн','Вт','Ср','Чт','Пт','Сб','Нд'].map(x=>`<span>${x}</span>`).join('')+'<i></i>'.repeat(lead);
+  for(let i=1;i<=n;i++){const d=S.view+'-'+pad(i);h+=`<button type="button" data-pd="${d}" class="${S.ft[d]?'has':''}">${i}</button>`}
+  $('ftPop').innerHTML=h+'</div>'}
+$('ftAddDay').onclick=e=>{e.stopPropagation();renderFtPop();$('ftPop').hidden=!$('ftPop').hidden};
+document.addEventListener('click',e=>{if(!e.target.closest('#ov6 .popwrap'))$('ftPop').hidden=true});
+$('ftPop').addEventListener('click',e=>{const d=e.target.dataset.pd;if(!d)return;if(!S.ft[d])S.ft[d]={iv:[{a:'',b:''}],m:0};saveMeta();$('ftPop').hidden=true;renderFt()});
+$('ftOpen').onclick=()=>{$('ftPop').hidden=true;$('ov6').hidden=false;renderFt()};
 const ftClose=()=>{$('ov6').hidden=true};
 $('ftClose').onclick=ftClose;$('ov6').addEventListener('mousedown',e=>{if(e.target===$('ov6'))ftClose()});
 /* zoom a block to focus on it */
