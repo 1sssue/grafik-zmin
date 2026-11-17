@@ -321,6 +321,8 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 .ent.none{--eb:var(--surface)}
 .ent .n{color:inherit}
 .ent.off .t,.ent.none .t{color:inherit;opacity:.7}
+.otr{grid-template-columns:48px minmax(0,1fr) auto 28px}
+.otr .otx{width:78px}
 /* modals */
 .ov{position:fixed;inset:0;background:rgba(10,14,28,.5);z-index:50;display:grid;place-items:center;padding:16px}
 .ov[hidden]{display:none}
@@ -859,7 +861,7 @@ function renderOT(){
   ds.forEach(d=>S.ot[d].iv.forEach(iv=>{const a=parseT(iv.a),b=parseT(iv.b);if(b!=null){const k=a==null?-1:((b-a+1440)%1440)/60;if(!(Number.isInteger(k)&&k>=1&&k<=12))iv.b=''}}));
   $('otList').innerHTML=ds.length?ds.map(d=>{const e=S.ot[d];
     const ivs=e.iv.map((iv,i)=>`<span class="iv"><input type="time" id="ot-${d}-a${i}" data-a="${i}" value="${iv.a}" aria-label="Початок"><span>–</span><select id="ot-${d}-b${i}" data-b="${i}" aria-label="Кінець, кратно годині"${iv.a?'':' disabled'}>${endOpts(iv)}</select>${e.iv.length>1?`<button type="button" data-ivdel="${i}" aria-label="Прибрати інтервал">✕</button>`:''}</span>`).join('');
-    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-h>${fmtH(otHours(e))}</div><div class="otm" data-m>${money(otMoney(e))}</div></div><button class="btn ghost sm otdel" type="button" data-otdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-ivadd>+ інтервал</button></div><label class="otx">×<input type="text" inputmode="decimal" id="otx-${d}" data-x value="${esc(e.x)}" aria-label="Кратність тарифу"></label></div></div>`}).join(''):'<p class="empty-note">Перепрацювань за цей місяць ще немає.</p>';
+    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-h>${fmtH(otHours(e))}</div><div class="otm" data-m>${money(otMoney(e))}</div></div><label class="otx">×<input type="text" inputmode="decimal" id="otx-${d}" data-x value="${esc(e.x)}" aria-label="Кратність тарифу"></label><button class="btn ghost sm otdel" type="button" data-otdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-ivadd>+ інтервал</button></div></div></div>`}).join(''):'<p class="empty-note">Перепрацювань за цей місяць ще немає.</p>';
   refreshOT();
 }
 function refreshOT(){
