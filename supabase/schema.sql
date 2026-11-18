@@ -4,7 +4,6 @@
 create table if not exists public.admin_emails (email text primary key);
 insert into public.admin_emails (email) values
   ('solonetskyi.r@novaposhta.ua'),
-  ('rsoloneckij17@gmail.com'),
   ('nelyaa40127@gmail.com')
 on conflict do nothing;
 
