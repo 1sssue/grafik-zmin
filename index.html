@@ -327,7 +327,8 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 .d .bar.g{background:color-mix(in srgb,var(--good) 24%,transparent)}
 .cc{margin-left:auto}
 .cc.r{color:var(--bad)}.cc.y{color:var(--warn)}.cc.g{color:var(--good)}
-.pay{display:block;flex:none;width:100%;margin:0;text-align:center;border-radius:8px;padding:2px 6px}
+.pay{display:inline-block;flex:none;width:auto;margin:0 auto;text-align:center;border-radius:999px;padding:2px 8px}
+.pay+.cc{margin-left:0}
 .card.side.zoom{width:min(640px,94vw)!important}
 body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
 .chartp{position:fixed;z-index:60;top:4vh;left:calc(50% + 48px);width:560px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.45);padding:16px;display:flex;flex-direction:column;gap:10px}
@@ -857,7 +858,7 @@ function renderCal(){
     if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi)});
     const ot=S.ot[d];if(S.main&&ot&&otHours(ot)>0)body+=`<div class="otl" title="Перепрацювання">Перепр. +${fmtH(otHours(ot))} ×${parseX(ot.x)}</div>`;
     const mo=out&&(day===1||i===0)?`<span class="mo">${MON3[+d.slice(5,7)-1]}</span>`:'';
-    h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${n?(()=>{const lv=chLevel(d,n),ic=lv.cls==='g'?'M2.5 8.5 6 12l7.5-8':lv.cls==='y'?'M3 8h10':'M3.5 3.5l9 9M12.5 3.5l-9 9';return `<span class="cc ${lv.cls||'r'}" title="Закрито чатів: ${n} · норма за день: ${fmtN(lv.norm)}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg></span>`})():''}</div>${payBadge(d)}<div class="cb">${body}</div></div>`;
+    h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${payBadge(d)}${n?(()=>{const lv=chLevel(d,n),ic=lv.cls==='g'?'M2.5 8.5 6 12l7.5-8':lv.cls==='y'?'M3 8h10':'M3.5 3.5l9 9M12.5 3.5l-9 9';return `<span class="cc ${lv.cls||'r'}" title="Закрито чатів: ${n} · норма за день: ${fmtN(lv.norm)}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg></span>`})():''}</div><div class="cb">${body}</div></div>`;
   }
   $('grid').innerHTML=h;$('grid').dataset.n=ids.length;
   renderLegend(keys);
