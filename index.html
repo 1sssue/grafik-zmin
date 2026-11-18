@@ -281,7 +281,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .side.zoom .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
 #otCard.zoom .otlist{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
 .card.side.zoom{overflow:hidden!important}
-.zbtn{margin-left:auto;flex:none}
 .tdin{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tdin label{width:auto}
 .tdin input{width:100%}
@@ -295,7 +294,6 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 .ftbar{display:flex;justify-content:center;gap:12px;padding:6px 0 12px}
 .ftbar .btn{width:190px;height:40px;justify-content:center}
 .ftbar .btn:disabled{opacity:.55;cursor:default}
-.zbtn{margin-left:auto;width:38px;height:38px;padding:0;justify-content:center;font-size:20px;line-height:1}
 .ivs{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:6px}
 @media (max-width:1150px){
   html,body{height:auto;overflow:auto}
@@ -306,9 +304,6 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 }
 /* round 7 */
 .cal,.blk,.today{position:relative}
-.btn.zbtn{position:absolute;top:10px;right:10px;margin:0;z-index:3;width:32px;height:32px;padding:0;font-size:16px;line-height:1;justify-content:center;background:#7a5af8;border-color:#7a5af8;color:#fff}
-.btn.zbtn:hover{background:#6a49e8;border-color:#6a49e8}
-.calhead,.sidehead,#otCard .bh{padding-right:44px}
 .inputs{grid-template-columns:minmax(120px,1fr) minmax(0,1.5fr);align-items:end}
 .inputs .fld{height:40px}
 .otfoot{justify-content:space-between;align-items:center}
@@ -323,6 +318,26 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 .ent.off .t,.ent.none .t{color:inherit;opacity:.7}
 .otr{grid-template-columns:48px minmax(0,1fr) auto 28px}
 .otr .otx{width:78px}
+/* round 9 */
+.hbtns{display:flex;gap:6px;align-items:center;align-self:flex-start;flex:none}
+.zbtn{flex:none;min-width:30px;justify-content:center;font-size:15px;line-height:1}
+.side:not(.zoom) #chartToggle{display:none}
+.d .bar.r{background:color-mix(in srgb,var(--bad) 24%,transparent)}
+.d .bar.y{background:color-mix(in srgb,var(--warn) 26%,transparent)}
+.d .bar.g{background:color-mix(in srgb,var(--good) 24%,transparent)}
+.cc{margin-left:auto}
+.cc.r{color:var(--bad)}.cc.y{color:var(--warn)}.cc.g{color:var(--good)}
+.pay{display:block;flex:none;width:100%;margin:0;text-align:center;border-radius:8px;padding:2px 6px}
+.card.side.zoom{width:min(640px,94vw)!important}
+body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
+.chartp{position:fixed;z-index:60;top:4vh;left:calc(50% + 48px);width:560px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.45);padding:16px;display:flex;flex-direction:column;gap:10px}
+.chp-h{display:flex;justify-content:space-between;align-items:baseline}
+.chp-h b{font:800 16px var(--font-display)}
+.chlg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.chlg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chlg i.g{background:var(--good)}.chlg i.y{background:var(--warn)}.chlg i.r{background:var(--bad)}
+.chlg i.n{height:0;border-top:2px dashed var(--fg);border-radius:0;width:14px}
+@media (max-width:1300px){.chartp{display:none!important}body.zchart .card.side.zoom{left:50%!important}#chartToggle{display:none!important}}
 /* modals */
 .ov{position:fixed;inset:0;background:rgba(10,14,28,.5);z-index:50;display:grid;place-items:center;padding:16px}
 .ov[hidden]{display:none}
@@ -398,6 +413,7 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
   <span class="sub2" id="meMail" hidden></span>
   <button class="btn icon-btn" id="themeBtn" type="button" aria-label="Змінити тему" title="Світла / темна тема"></button>
   <button class="btn" id="admBtn" type="button" hidden>Адмін</button>
+  <button class="btn" id="dataBtn" type="button" hidden>Імпорт / Експорт</button>
   <button class="btn" id="outBtn" type="button" hidden>Вийти</button>
 
   <input type="file" id="fileInp" accept=".xlsx,.xlsm,.xls" multiple hidden>
@@ -432,7 +448,7 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
     <aside class="card side" aria-label="Закриті чати"><div class="side-in">
       <div class="sidehead">
         <div><h2>Закрито чатів</h2><div class="big" style="margin-top:6px"><b id="sumN">0</b><span id="sumLbl">за місяць</span></div></div>
-        <button class="btn primary zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
+        <div class="hbtns"><button class="btn sm" id="chartToggle" type="button">Сховати графік</button><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
       </div>
       <div class="stats">
         <div class="stat"><small>Середнє на день</small><b id="avgN">—</b></div>
@@ -454,7 +470,7 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
         <span class="spacer"></span>
         <button class="btn primary sm" id="upBtn" type="button"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"/></svg><span class="lblt">Додати файл</span></button>
         <button class="btn sm" id="filesBtn" type="button">Файли <span class="badge" id="fileCount">0</span></button>
-        <button class="btn primary zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
+        <button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
       </div>
       <div id="note"></div>
       <div class="legend" id="legend"></div>
@@ -467,8 +483,7 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
     <section class="card blk" id="otCard" aria-label="Перепрацювання">
       <div class="bh">
         <div><h2>Перепрацювання</h2><div class="sub2" id="otMonth"></div></div>
-        <button class="btn primary zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
-        <div class="popwrap"><button class="btn sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div>
+        <div class="hbtns"><div class="popwrap"><button class="btn sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
       </div>
       <div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div>
       <div class="otlist" id="otList"></div>
@@ -537,6 +552,24 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
   </div>
 </div>
 <div class="zbk" id="zbk" hidden></div>
+<div class="chartp" id="chartP" hidden>
+  <div class="chp-h"><b>Чати по днях</b><span class="sub2" id="chMonth"></span></div>
+  <div id="chSvg"></div>
+  <div class="chlg"><span><i class="g"></i>≥ норми</span><span><i class="y"></i>від ½ норми</span><span><i class="r"></i>менше ½ норми</span><span><i class="n"></i>норма за день</span></div>
+</div>
+<div class="ov" id="ov7" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt7">
+    <div class="mh"><h3 id="mt7">Імпорт та експорт <button class="btn ghost sm" id="dataClose" type="button" aria-label="Закрити">✕</button></h3></div>
+    <div class="gbody">
+      <p class="hint" id="dataWhat"></p>
+      <button class="btn primary" id="expBtn" type="button" style="justify-content:center">Експортувати у файл</button>
+      <label class="chk"><input type="radio" name="impMode" value="merge" checked> Об’єднати (збіги днів перезаписуються)</label>
+      <label class="chk"><input type="radio" name="impMode" value="replace"> Замінити всі наявні дані</label>
+      <button class="btn" id="impBtn" type="button" style="justify-content:center">Імпортувати з файлу…</button>
+      <input type="file" id="impInp" accept=".json,application/json" hidden>
+    </div>
+  </div>
+</div>
 <div class="ov" id="ov6" hidden>
   <div class="modal ftmodal" role="dialog" aria-modal="true" aria-labelledby="mt6">
     <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
@@ -778,7 +811,7 @@ function refreshChats(){
   for(let i=1;i<=n;i++){const t=chTotal(st[S.view+'-'+pad(i)]);vals.push(t);if(t>max)max=t}
   document.querySelectorAll('#days .d').forEach((row,i)=>{
     const t=vals[i];row.title=t?'Підсумок (без відкладених): '+t:'';
-    row.querySelector('.bar').style.width=(Math.max(0,t)/max*100)+'%';
+    const lv=chLevel(row.dataset.date,t),bar=row.querySelector('.bar');bar.className='bar'+(t>0&&lv.cls?' '+lv.cls:'');bar.style.width=t>0?Math.min(100,lv.ratio*100)+'%':'0%';
   });
   const sum=vals.reduce((a,b)=>a+b,0),all=vals.map((v,i)=>({v,d:i+1})).filter(x=>x.v!==0);
   const filled=all.filter(x=>dayHours(S.view+'-'+pad(x.d))>0),ws=filled.reduce((a,x)=>a+x.v,0);
@@ -791,6 +824,7 @@ function refreshChats(){
   $('normN').textContent=!filled.length?'—':diff>0?'+'+fmtN(diff)+' чатів':diff<0?fmtN(-diff)+' чатів':'норму виконано';
   const best=[...all].sort((a,b)=>b.v-a.v)[0];
   $('bestN').textContent=best&&best.v>0?best.v+' · '+pad(best.d)+'.'+S.view.slice(5):'—';
+  if(zoomEl&&chartOn&&zoomEl.classList.contains('side'))renderChart();
 }
 
 /* calendar */
@@ -823,7 +857,7 @@ function renderCal(){
     if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi)});
     const ot=S.ot[d];if(S.main&&ot&&otHours(ot)>0)body+=`<div class="otl" title="Перепрацювання">Перепр. +${fmtH(otHours(ot))} ×${parseX(ot.x)}</div>`;
     const mo=out&&(day===1||i===0)?`<span class="mo">${MON3[+d.slice(5,7)-1]}</span>`:'';
-    h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${payBadge(d)}${n?`<span class="cc${n<0?' neg':''}" title="Закрито чатів: ${n}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5 6 12l7.5-8"/></svg></span>`:''}</div><div class="cb">${body}</div></div>`;
+    h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${n?(()=>{const lv=chLevel(d,n),ic=lv.cls==='g'?'M2.5 8.5 6 12l7.5-8':lv.cls==='y'?'M3 8h10':'M3.5 3.5l9 9M12.5 3.5l-9 9';return `<span class="cc ${lv.cls||'r'}" title="Закрито чатів: ${n} · норма за день: ${fmtN(lv.norm)}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg></span>`})():''}</div>${payBadge(d)}<div class="cb">${body}</div></div>`;
   }
   $('grid').innerHTML=h;$('grid').dataset.n=ids.length;
   renderLegend(keys);
@@ -1098,7 +1132,7 @@ async function enter(user){
   if(st&&st.data&&st.data.meta)applyCloud(st.data);
   READY=true;if(!(st&&st.data&&st.data.meta))cloudPush();
   $('gate').hidden=true;$('meMail').textContent=ME.email;$('meMail').hidden=false;$('outBtn').hidden=false;
-  $('admBtn').hidden=ME.role!=='admin';$('ftOpen').hidden=!(ME.role==='admin'||ME.can_free_time);
+  $('admBtn').hidden=ME.role!=='admin';$('dataBtn').hidden=false;$('ftOpen').hidden=!(ME.role==='admin'||ME.can_free_time);
 }
 $('outBtn').onclick=async()=>{await sb.auth.signOut();clearLocal();localStorage.removeItem('shifts.owner');location.reload()};
 /* admin */
@@ -1146,11 +1180,55 @@ const ftClose=()=>{$('ov6').hidden=true};
 $('ftClose').onclick=ftClose;$('ov6').addEventListener('mousedown',e=>{if(e.target===$('ov6'))ftClose()});
 /* zoom a block to focus on it */
 let zoomEl=null;
-function zoomOff(){if(!zoomEl)return;zoomEl.classList.remove('zoom');zoomEl.querySelector('.zbtn').textContent='⤢';zoomEl=null;$('zbk').hidden=true;document.body.style.overflow=''}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-zoom]');if(!b)return;const el=b.closest('.card');if(el===zoomEl){zoomOff();return}zoomOff();zoomEl=el;el.classList.add('zoom');b.textContent='✕';$('zbk').hidden=false;document.body.style.overflow='hidden'});
+function zoomOff(){if(!zoomEl)return;zoomEl.classList.remove('zoom');zoomEl.querySelector('.zbtn').textContent='⤢';zoomEl=null;$('zbk').hidden=true;document.body.style.overflow='';syncChart()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-zoom]');if(!b)return;const el=b.closest('.card');if(el===zoomEl){zoomOff();return}zoomOff();zoomEl=el;el.classList.add('zoom');b.textContent='✕';$('zbk').hidden=false;document.body.style.overflow='hidden';syncChart()});
 $('zbk').onclick=zoomOff;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){zoomOff();ftClose()}});
-$('qbChk').onchange=e=>{S.qb[S.view]=e.target.checked;saveMeta();renderSalary();refreshToday();refreshChats()};
+/* ===== */
+/* chat level by daily norm: r < 50%, y >= 50%, g >= norm */
+function chLevel(d,v){const norm=nrate(d.slice(0,7))*dayHours(d);if(v<=0)return{norm,ratio:0,cls:v<0?'r':''};const ratio=norm>0?v/norm:Infinity;return{norm,ratio,cls:ratio>=1?'g':ratio>=.5?'y':'r'}}
+let chartOn=localStorage.getItem('shifts.chart')!=='0';
+function syncChart(){const on=!!(zoomEl&&zoomEl.classList.contains('side')&&chartOn);document.body.classList.toggle('zchart',on);$('chartP').hidden=!on;$('chartToggle').textContent=chartOn?'Сховати графік':'Показати графік';if(on)renderChart()}
+function renderChart(){
+  const n=daysIn(S.view),st=CH(),W=560,H=300,L=34,Rg=8,T=14,B=26,pw=W-L-Rg,ph=H-T-B,rows=[];let mx=1;
+  for(let i=1;i<=n;i++){const d=S.view+'-'+pad(i),v=chTotal(st[d]),lv=chLevel(d,v);rows.push({i,v,norm:lv.norm,cls:lv.cls});mx=Math.max(mx,v,lv.norm)}
+  const step=mx<=20?5:mx<=60?10:mx<=150?25:50,top=Math.ceil(mx*1.05/step)*step,y=v=>T+ph-v/top*ph,bw=pw/n,col={g:'--good',y:'--warn',r:'--bad'};
+  let g='',bars='',nl='';
+  for(let v=0;v<=top;v+=step)g+=`<line x1="${L}" x2="${W-Rg}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line)"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end" style="fill:var(--muted);font-size:10px">${v}</text>`;
+  rows.forEach(r=>{const x=L+(r.i-1)*bw;
+    if(r.v>0)bars+=`<rect x="${x+bw*.15}" y="${y(r.v)}" width="${bw*.7}" height="${Math.max(1,T+ph-y(r.v))}" rx="2" style="fill:var(${col[r.cls]||'--bad'})"><title>${pad(r.i)}.${S.view.slice(5)}: ${r.v} (норма ${fmtN(r.norm)})</title></rect>`;
+    if(r.norm>0)nl+=`<line x1="${x+1}" x2="${x+bw-1}" y1="${y(r.norm)}" y2="${y(r.norm)}" style="stroke:var(--fg);stroke-width:1.6;stroke-dasharray:3 2"/>`;
+    if(r.i%2===1||n<=16)g+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" style="fill:var(--muted);font-size:9.5px">${r.i}</text>`});
+  $('chSvg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Чати по днях">${g}${bars}${nl}</svg>`;
+  $('chMonth').textContent=monthName(S.view);
+}
+$('chartToggle').onclick=()=>{chartOn=!chartOn;try{localStorage.setItem('shifts.chart',chartOn?'1':'0')}catch(e){}syncChart()};
+/* export / import */
+const canFt=()=>!!ME&&(ME.role==='admin'||ME.can_free_time);
+$('dataBtn').onclick=()=>{$('dataWhat').textContent='У файл потрапляють чати, перепрацювання'+(canFt()?' та вільний час':'')+'. Графіки змін (xlsx) не входять, їх додають окремо.';$('ov7').hidden=false};
+$('dataClose').onclick=()=>{$('ov7').hidden=true};
+$('ov7').addEventListener('mousedown',e=>{if(e.target===$('ov7'))$('ov7').hidden=true});
+$('expBtn').onclick=()=>{const o={app:'grafik-zmin',v:1,exported:new Date().toISOString(),chats:S.chats,ot:S.ot};if(canFt())o.ft=S.ft;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,1)],{type:'application/json'}));a.download='grafik-data-'+todayStr()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
+$('impBtn').onclick=()=>$('impInp').click();
+$('impInp').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  let o;try{o=JSON.parse(await f.text())}catch(x){toast('Файл не схожий на експорт: некоректний JSON.');return}
+  if(!o||typeof o!=='object'||o.app!=='grafik-zmin'){toast('Це не файл експорту цього сайту.');return}
+  const mode=document.querySelector('input[name=impMode]:checked').value;
+  const isD=k=>/^\d{4}-\d{2}-\d{2}$/.test(k),tv=v=>{v=String(v||'');return /^\d{2}:\d{2}$/.test(v)?v:''},nn=v=>Math.max(0,Math.floor(+v)||0);
+  const ivs=a=>(Array.isArray(a)?a:[]).map(i=>({a:tv(i&&i.a),b:tv(i&&i.b)}));
+  const chats={},ot={},ft={};
+  Object.entries(o.chats||{}).forEach(([d,c])=>{if(!isD(d)||!c||typeof c!=='object')return;const r={};['n','p','l','b'].forEach(k=>{if(c[k]!=null)r[k]=nn(c[k])});if(Object.keys(r).length)chats[d]=r});
+  Object.entries(o.ot||{}).forEach(([d,x])=>{if(isD(d)&&x&&typeof x==='object')ot[d]={iv:ivs(x.iv),x:String(x.x!=null?x.x:'1.5')}});
+  const withFt=canFt()&&o.ft&&typeof o.ft==='object';
+  if(withFt)Object.entries(o.ft).forEach(([d,x])=>{if(isD(d)&&x&&typeof x==='object')ft[d]={iv:ivs(x.iv),m:nn(x.m)}});
+  if(mode==='replace'){S.chats=chats;S.ot=ot;if(withFt)S.ft=ft}else{Object.assign(S.chats,chats);Object.assign(S.ot,ot);if(withFt)Object.assign(S.ft,ft)}
+  saveMeta();renderAll();$('ov7').hidden=true;
+  toast('Імпортовано: чати '+Object.keys(chats).length+' дн., перепрацювання '+Object.keys(ot).length+' дн.'+(withFt?', вільний час '+Object.keys(ft).length+' дн.':''));
+};
+
+$('qbChk').onchange=e=>{S.qb[S.view]=e.target.checked;saveMeta();renderSalary();refreshToday();refreshChats();renderCal()};
 
 $('rate').value=S.rate!=null?S.rate:(S.demo?140:'');
 $('rank').value=S.rank;
