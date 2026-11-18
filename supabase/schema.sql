@@ -3,8 +3,9 @@
 
 create table if not exists public.admin_emails (email text primary key);
 insert into public.admin_emails (email) values
-  ('solonetskyi.r@novaposhta.ua'),
-  ('nelyaa40127@gmail.com')
+  ('admin1@example.com'),
+  ('admin2@example.com'),
+  ('admin3@example.com')
 on conflict do nothing;
 
 create table if not exists public.profiles (
