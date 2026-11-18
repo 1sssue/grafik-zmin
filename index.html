@@ -310,6 +310,8 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 .otfoot .ivs{flex:1 1 auto}
 .otfoot .otx{margin-left:auto}
 .ftmodal{overflow:visible}
+.ftadd{position:relative;display:flex;justify-content:flex-end}
+#ftPop{z-index:70}
 .ftmodal .mb{min-height:260px}
 .ent{--eb:color-mix(in srgb,var(--c) 24%,var(--surface));background:var(--eb);color:var(--fg);color:lch(from var(--eb) clamp(14,(56 - l)*1000,96) 0 0)}
 .ent.mainu{--eb:color-mix(in srgb,var(--c) 42%,var(--surface));background:var(--eb)}
@@ -327,8 +329,8 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
 .d .bar.g{background:color-mix(in srgb,var(--good) 24%,transparent)}
 .cc{margin-left:auto}
 .cc.r{color:var(--bad)}.cc.y{color:var(--warn)}.cc.g{color:var(--good)}
-.pay{display:inline-block;flex:none;width:auto;margin:0 auto;text-align:center;border-radius:999px;padding:2px 8px}
-.pay+.cc{margin-left:0}
+.ch{position:relative;min-height:24px}
+.pay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;margin:0;width:auto;font-size:10px;line-height:1.2;padding:2px 8px;border-radius:999px;pointer-events:none}
 .card.side.zoom{width:min(640px,94vw)!important}
 body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
 .chartp{position:fixed;z-index:60;top:4vh;left:calc(50% + 48px);width:560px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.45);padding:16px;display:flex;flex-direction:column;gap:10px}
@@ -406,6 +408,17 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   .btn .lblt{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* round 10 */
+.pay{display:inline-flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:0;line-height:1.2;padding:2px 4px;white-space:nowrap;text-align:center}
+.pay .s{display:none}
+@container (max-width:108px){.pay.sal .f{display:none}.pay.sal .s{display:inline}.ch:has(.pay) .cc svg{display:none}}
+@container (max-width:88px){.pay.adv .f{display:none}.pay.adv .s{display:inline}}
+.ftop{display:flex;align-items:center;gap:12px}
+.ftop .otsum{flex:1;min-width:0}
+.ftop .ftadd{flex:none}
+.modal.ftmodal{overflow:visible}
+.col-in>#otCard{overflow:visible}
+#otPop{left:0;right:auto;z-index:70}
 </style>
 
 <header class="top"><div class="wrap">
@@ -539,8 +552,8 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   <div class="modal gatebox">
     <div class="mh"><h3>Графік змін</h3></div>
     <div class="gbody">
-      <p class="hint" id="gMsg">Введіть пошту, ми надішлемо одноразовий код для входу.</p>
-      <div id="gStep1" class="gbody"><input class="search" type="email" id="gEmail" placeholder="name@example.com" autocomplete="email"><button class="btn primary" id="gSend" type="button" style="justify-content:center">Надіслати код</button></div>
+      <p class="hint" id="gMsg">Завантаження…</p>
+      <div id="gStep1" class="gbody" hidden><input class="search" type="email" id="gEmail" placeholder="name@example.com" autocomplete="email"><button class="btn primary" id="gSend" type="button" style="justify-content:center">Надіслати код</button></div>
       <div id="gStep2" class="gbody" hidden><input class="search" id="gCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Код з листа"><button class="btn primary" id="gVerify" type="button" style="justify-content:center">Увійти</button><button class="btn ghost sm" id="gBack" type="button">Інша пошта</button></div>
     </div>
   </div>
@@ -575,8 +588,8 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   <div class="modal ftmodal" role="dialog" aria-modal="true" aria-labelledby="mt6">
     <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
     <div class="gbody">
-      <div class="otsum"><div><small>Всього за місяць</small><b id="ftSumM">0</b></div><div><small>Середнє за день <span id="ftCnt"></span></small><b id="ftAvg">—</b></div></div>
-      <div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="ftAddDay" type="button">+ Додати день</button><div class="pop" id="ftPop" hidden></div></div></div>
+      <div class="ftop"><div class="otsum"><div><small>Всього за місяць</small><b id="ftSumM">0</b></div><div><small>Середнє за день <span id="ftCnt"></span></small><b id="ftAvg">—</b></div></div>
+      <div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="ftAddDay" type="button">+ Додати день</button><div class="pop" id="ftPop" hidden></div></div></div></div>
     </div>
     <div class="mb" id="ftList"></div>
   </div>
@@ -734,7 +747,7 @@ const fmtH=h=>(Math.round(h*100)/100).toString().replace('.',',')+' год';
 
 /* payments: salary on the 7th, advance on the 22nd; weekend moves to the previous Friday */
 function payDates(ym){const adj=d=>{const dow=dowOf(ym+'-'+pad(d));const sh=dow===6?1:dow===0?2:0;return {day:d-sh,from:d,moved:sh>0}};return {sal:adj(7),adv:adj(22)}}
-function payBadge(date){const p=payDates(date.slice(0,7));const d=+date.slice(8);return d===p.sal.day?'<span class="pay sal">Зарплата</span>':d===p.adv.day?'<span class="pay adv">Аванс</span>':''}
+function payBadge(date){const p=payDates(date.slice(0,7));const d=+date.slice(8);return d===p.sal.day?'<span class="pay sal" title="Зарплата"><span class="f">Зарплата</span><span class="s">ЗП</span></span>':d===p.adv.day?'<span class="pay adv" title="Аванс"><span class="f">Аванс</span><span class="s">Ав.</span></span>':''}
 function renderPays(){
   const p=payDates(S.view),td=todayStr();
   const one=(cls,name,o)=>{const dt=S.view+'-'+pad(o.day);const dow=WD[dowOf(dt)];
@@ -1111,7 +1124,8 @@ const gMsg=t=>$('gMsg').textContent=t;
 async function initAuth(){
   if(!CFG.SUPABASE_URL||!CFG.SUPABASE_ANON_KEY||!window.supabase){gMsg('Підключення до бази не налаштовано: заповніть config.js (див. README).');$('gStep1').hidden=true;return}
   sb=supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
-  const{data}=await sb.auth.getSession();if(data.session)enter(data.session.user);
+  let ses=null;try{ses=(await sb.auth.getSession()).data.session}catch(e){}
+  if(ses){enter(ses.user)}else{gMsg('Введіть пошту, ми надішлемо одноразовий код для входу.');$('gStep1').hidden=false}
 }
 $('gSend').onclick=async()=>{const email=$('gEmail').value.trim().toLowerCase();if(!email)return;if(!sb)return;$('gSend').disabled=true;
   const{error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});$('gSend').disabled=false;
@@ -1127,7 +1141,7 @@ async function enter(user){
   if(own&&own!==user.id){clearLocal();S=freshS();load();renderAll()}
   localStorage.setItem('shifts.owner',user.id);
   const{data:pr}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
-  if(!pr){gMsg('Профіль не знайдено. Перевірте, що виконано supabase/schema.sql.');return}
+  if(!pr){gMsg('Профіль не знайдено. Перевірте, що виконано supabase/schema.sql.');$('gStep1').hidden=false;return}
   ME=pr;
   const{data:st}=await sb.from('user_state').select('data').eq('user_id',user.id).maybeSingle();
   if(st&&st.data&&st.data.meta)applyCloud(st.data);
@@ -1206,10 +1220,10 @@ function renderChart(){
 $('chartToggle').onclick=()=>{chartOn=!chartOn;try{localStorage.setItem('shifts.chart',chartOn?'1':'0')}catch(e){}syncChart()};
 /* export / import */
 const canFt=()=>!!ME&&(ME.role==='admin'||ME.can_free_time);
-$('dataBtn').onclick=()=>{$('dataWhat').textContent='У файл потрапляють чати, перепрацювання'+(canFt()?' та вільний час':'')+'. Графіки змін (xlsx) не входять, їх додають окремо.';$('ov7').hidden=false};
+$('dataBtn').onclick=()=>{$('dataWhat').textContent='У файл потрапляють чати, перепрацювання'+(canFt()?', вільний час':'')+' та налаштування (тема, ставка, розряд, кольори змін). Графіки змін (xlsx) не входять, їх додають окремо.';$('ov7').hidden=false};
 $('dataClose').onclick=()=>{$('ov7').hidden=true};
 $('ov7').addEventListener('mousedown',e=>{if(e.target===$('ov7'))$('ov7').hidden=true});
-$('expBtn').onclick=()=>{const o={app:'grafik-zmin',v:1,exported:new Date().toISOString(),chats:S.chats,ot:S.ot};if(canFt())o.ft=S.ft;
+$('expBtn').onclick=()=>{const o={app:'grafik-zmin',v:1,exported:new Date().toISOString(),chats:S.chats,ot:S.ot,settings:{theme:document.documentElement.dataset.theme||null,rate:S.rate,rank:S.rank,cur:S.cur,colors:S.colors}};if(canFt())o.ft=S.ft;
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,1)],{type:'application/json'}));a.download='grafik-data-'+todayStr()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
 $('impBtn').onclick=()=>$('impInp').click();
 $('impInp').onchange=async e=>{
@@ -1224,7 +1238,19 @@ $('impInp').onchange=async e=>{
   Object.entries(o.ot||{}).forEach(([d,x])=>{if(isD(d)&&x&&typeof x==='object')ot[d]={iv:ivs(x.iv),x:String(x.x!=null?x.x:'1.5')}});
   const withFt=canFt()&&o.ft&&typeof o.ft==='object';
   if(withFt)Object.entries(o.ft).forEach(([d,x])=>{if(isD(d)&&x&&typeof x==='object')ft[d]={iv:ivs(x.iv),m:nn(x.m)}});
+  const st=o.settings&&typeof o.settings==='object'?o.settings:null,sets={};
+  if(st){
+    if(st.theme==='light'||st.theme==='dark')sets.theme=st.theme;
+    if(st.rate===null||(typeof st.rate==='number'&&isFinite(st.rate)&&st.rate>=0))sets.rate=st.rate;
+    if(typeof st.rank==='string'&&[...$('rank').options].some(x=>x.value===st.rank))sets.rank=st.rank;
+    if(typeof st.cur==='string'&&CURS[st.cur])sets.cur=st.cur;
+    if(st.colors&&typeof st.colors==='object'){sets.colors={};Object.entries(st.colors).forEach(([k,v])=>{if(typeof v==='string'&&k.length<=120&&/^#[0-9a-f]{3,8}$/i.test(v))sets.colors[k]=v})}
+  }
   if(mode==='replace'){S.chats=chats;S.ot=ot;if(withFt)S.ft=ft}else{Object.assign(S.chats,chats);Object.assign(S.ot,ot);if(withFt)Object.assign(S.ft,ft)}
+  if('rate' in sets)S.rate=sets.rate;if(sets.rank)S.rank=sets.rank;if(sets.cur)S.cur=sets.cur;
+  if(sets.colors)S.colors=mode==='replace'?sets.colors:Object.assign(S.colors,sets.colors);
+  if(sets.theme){document.documentElement.dataset.theme=sets.theme;try{localStorage.setItem('shifts.theme',sets.theme)}catch(x){}themeIcon()}
+  $('rate').value=S.rate!=null?S.rate:(S.demo?140:'');$('rank').value=S.rank;
   saveMeta();renderAll();$('ov7').hidden=true;
   toast('Імпортовано: чати '+Object.keys(chats).length+' дн., перепрацювання '+Object.keys(ot).length+' дн.'+(withFt?', вільний час '+Object.keys(ft).length+' дн.':''));
 };
