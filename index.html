@@ -418,7 +418,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
 .ftop .ftadd{flex:none}
 .modal.ftmodal{overflow:visible}
 .col-in>#otCard{overflow:visible}
-#otPop{left:0;right:auto;z-index:70}
+#otPop{z-index:70}
 </style>
 
 <header class="top"><div class="wrap">
@@ -482,8 +482,8 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
         <button class="nav" id="nextM" type="button" aria-label="Наступний місяць">›</button>
         <button class="btn sm" id="todayBtn" type="button" style="margin-left:6px">Сьогодні</button>
         <span class="spacer"></span>
-        <button class="btn primary sm" id="upBtn" type="button"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"/></svg><span class="lblt">Додати файл</span></button>
         <button class="btn sm" id="filesBtn" type="button">Файли <span class="badge" id="fileCount">0</span></button>
+        <button class="btn primary sm" id="upBtn" type="button"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"/></svg><span class="lblt">Додати файл</span></button>
         <button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
       </div>
       <div id="note"></div>
@@ -497,9 +497,9 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
     <section class="card blk" id="otCard" aria-label="Перепрацювання">
       <div class="bh">
         <div><h2>Перепрацювання</h2><div class="sub2" id="otMonth"></div></div>
-        <div class="hbtns"><div class="popwrap"><button class="btn sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
+        <div class="hbtns"><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
       </div>
-      <div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div>
+      <div class="ftop"><div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div><div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div></div></div>
       <div class="otlist" id="otList"></div>
     </section>
 
@@ -742,7 +742,7 @@ function allKeys(){
 /* money / rate */
 const rate=()=>S.rate!=null?S.rate:(S.demo?140:0);
 const rankPct=()=>(RANKS.find(r=>r.id===S.rank)||RANKS[1]).pct;
-const money=v=>(Math.round(v*100)/100).toLocaleString('uk-UA',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+CURS[S.cur][0];
+const money=v=>Math.round(v).toLocaleString('uk-UA',{minimumFractionDigits:0,maximumFractionDigits:0})+' '+CURS[S.cur][0];
 const fmtH=h=>(Math.round(h*100)/100).toString().replace('.',',')+' год';
 
 /* payments: salary on the 7th, advance on the 22nd; weekend moves to the previous Friday */
