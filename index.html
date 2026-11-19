@@ -99,10 +99,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .dow div{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding-left:8px}
 .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);flex:1;min-height:0;gap:6px}
 .cell{container-type:inline-size;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:8px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.cell.we{background:var(--weekend)}
+.cell.we{background:transparent}
 .cell.out{opacity:.45;cursor:pointer}
 .cell.out:hover{opacity:.7}
 .cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.cell.we.today{background:transparent}
 .ch{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .dn{font:700 13px var(--font-display);min-width:24px;height:24px;display:grid;place-items:center;border-radius:50%;font-variant-numeric:tabular-nums}
 .today .dn{background:var(--accent);color:var(--accent-ink)}
@@ -198,6 +199,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tdin input::-webkit-outer-spin-button,.tdin input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .tdin input:focus{border-color:var(--accent)}
 .tdres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.leaders-label{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.leaders{display:flex;flex-wrap:wrap;gap:6px}
+.leader-chip{display:flex;align-items:center;gap:8px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);font-weight:600;font-size:12px}
+.leader-chip small{font:700 11px var(--font-display);color:var(--accent);font-variant-numeric:tabular-nums}
 .tdres .stat small{font-size:10px;letter-spacing:.03em}
 .stat.ok b{color:var(--good)}.stat.lack b{color:var(--warn)}
 /* bottom row */
@@ -459,6 +464,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   body:not([data-tab="cal"]) .mtitle{flex-direction:column;align-items:flex-start;gap:0;font-size:22px;overflow:hidden}
   body:not([data-tab="cal"]) .mtitle span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
   body:not([data-tab="cal"]) .mtitle small{line-height:1.2}
+  body:not([data-tab="cal"]) #mFiles{display:none}
 
   /* content area */
   main.wrap{width:100%;flex:1 1 0;min-height:0;display:flex;flex-direction:column;margin:0;padding:0}
@@ -485,9 +491,10 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   .grid.sw-prev{animation:swPrev .28s ease-out}
   .cell{border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;padding:5px 2px 2px;gap:3px;overflow:hidden;min-height:0}
   .cell:nth-child(-n+7){border-top:0}
-  .cell.we{background:var(--weekend)}
+  .cell.we{background:transparent}
   .cell.out{display:flex;opacity:.4}
   .cell.today{background:var(--accent-soft);box-shadow:none;border-radius:12px;border-top-color:transparent}
+  .cell.we.today{background:transparent}
   .ch{flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-height:0}
   .ch .cc,.ch .mo,.ch .wd{display:none}
   .dn{font-size:14px;height:22px;min-width:22px}
@@ -495,6 +502,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   .ch .pay{position:static;transform:none;margin:0;font-size:9px;padding:1px 5px;text-transform:uppercase;font-weight:800;letter-spacing:.02em}
   .ch .pay.sal .f{display:none}.ch .pay.sal .s{display:inline}
   .ch .pay.adv .f{display:inline}.ch .pay.adv .s{display:none}
+  .ch .pay{font-size:12px;padding:2px 5px}
   .cb{flex:1;min-height:0;overflow:hidden;gap:2px}
   .ent.m .t,.ent.m .n{line-height:1.1}
   .ent.one.wk,.ent.one.wk.mainu{padding:0;border:0;background:none;box-shadow:none;gap:0;overflow:hidden;align-items:stretch}
@@ -502,7 +510,8 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   .ent.one.wk .ms{display:flex;flex-direction:column;width:100%}
   .ms b{display:block;text-align:center;font:700 12px/1.2 var(--font-display);padding:3px 0;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
   .ms b:first-child{background:var(--c);color:#10131f;color:lch(from var(--c) clamp(14,(56 - l)*1000,96) 0 0);border-radius:6px 6px 0 0}
-  .ms b:last-child{background:color-mix(in srgb,var(--c) 30%,var(--surface));color:var(--fg);border-radius:0 0 6px 6px}
+  .ms{gap:0;border-radius:6px;overflow:hidden}
+  .ms b:last-child{background:color-mix(in srgb,var(--c) 34%,var(--surface));color:var(--fg);border-radius:0}
   .ms b:only-child{border-radius:6px}
   .ent.one.off,.ent.one.none{display:none}
   .ent.one:not(.wk){padding:2px 3px;align-items:center}
@@ -533,6 +542,11 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   #ov6{padding:0;place-items:stretch}
   #ov6 .ftmodal{width:100%;max-height:none;height:100%;border-radius:0;border:0}
   #ov6 .mh{padding-top:max(0px,env(safe-area-inset-top,0px))}
+  body[data-tab="ft"] #ov6{display:block!important;inset:60px 0 var(--navh);padding:0 12px 12px;background:transparent;backdrop-filter:none;z-index:30}
+  body[data-tab="ft"] #ov6 .ftmodal{height:100%;max-height:none;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);background:var(--surface)}
+  body[data-tab="ft"] #ov6 .mh{display:none}
+  body[data-tab="ft"] #ov6 .gbody{padding-top:14px}
+  body[data-tab="ft"] .cal,body[data-tab="ft"] #todayCard,body[data-tab="ft"] .col-in>.side,body[data-tab="ft"] #otCard,body[data-tab="ft"] #payCard{display:none!important}
   #ov6 .ftmodal .mb{min-height:0}
 }
 </style>
@@ -575,6 +589,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
     <aside class="card today" id="todayCard" aria-label="Поточний день"><div class="today-in">
       <div class="bh"><div><h2>Сьогодні</h2><div class="sub2" id="tdDate"></div></div><span class="sub2" id="tdWho"></span></div>
       <div id="tdInfo"></div>
+      <div id="tdLeadersWrap" hidden><small class="leaders-label">Керівники на зміні</small><div id="tdLeaders" class="leaders"></div></div>
       <div class="tdin">
         <label><span>Загальна кількість</span><input type="number" min="0" inputmode="numeric" id="tdN" placeholder="0"></label>
         <label><span>Відкладені</span><input type="number" min="0" inputmode="numeric" id="tdP" placeholder="0"></label>
@@ -621,9 +636,9 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
 
 
     <div class="col"><div class="col-in">
-    <section class="card blk" id="otCard" aria-label="Перепрацювання">
+    <section class="card blk" id="otCard" aria-label="Переробка">
       <div class="bh">
-        <div><h2>Перепрацювання</h2><div class="sub2" id="otMonth"></div></div>
+        <div><h2>Переробка</h2><div class="sub2" id="otMonth"></div></div>
         <div class="hbtns"><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
       </div>
       <div class="ftop"><div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div><div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div></div></div>
@@ -642,7 +657,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
     </section>
     </div></div>
   </div>
-  <div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><button class="btn" id="soonBtn" type="button" disabled title="Незабаром">Скоро</button></div>
+<div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html">Шаблони</a><button class="btn" id="soonBtn" type="button" disabled title="Незабаром">Скоро</button></div>
 </main>
 
 <!-- people -->
@@ -693,7 +708,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   </div>
 </div>
 
-<nav class="mnav" id="mNav" aria-label="Розділи"><button type="button" data-tab="cal" class="on" aria-label="Календар"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Календар</span></button><button type="button" data-tab="today" aria-label="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg><span>Сьогодні</span></button><button type="button" data-tab="chats" aria-label="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg><span>Закрито чатів</span></button><button type="button" data-tab="ot" aria-label="Перепрацювання"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg><span>Пере&shy;працювання</span></button><button type="button" data-tab="pay" aria-label="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg><span>Зарплата</span></button><button type="button" data-tab="ft" id="mFtTab" hidden aria-label="Вільний час"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 5.5 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 5.5-4.5 9s4.5 4 4.5 9"/></svg><span>Вільний час</span></button></nav>
+<nav class="mnav" id="mNav" aria-label="Розділи"><button type="button" data-tab="cal" class="on" aria-label="Календар"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Календар</span></button><button type="button" data-tab="today" aria-label="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg><span>Сьогодні</span></button><button type="button" data-tab="chats" aria-label="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg><span>Закрито чатів</span></button><button type="button" data-tab="ot" aria-label="Переробка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg><span>Переробка</span></button><button type="button" data-tab="pay" aria-label="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg><span>Зарплата</span></button><button type="button" data-tab="ft" id="mFtTab" hidden aria-label="Вільний час"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 5.5 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 5.5-4.5 9s4.5 4 4.5 9"/></svg><span>Вільний час</span></button><button type="button" data-tab="templates" aria-label="Шаблони"><span>▦</span><span>Шаблони</span></button></nav>
 <button class="mfab" id="mFab" type="button" aria-label="Додати людей для відстеження"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.4-3.4 2.9-5.4 6.2-5.4s5.8 2 6.2 5.4M18.5 7.5v6M15.5 10.5h6"/></svg></button>
 <div class="ov" id="ovS" hidden>
   <div class="modal sheet" role="dialog" aria-modal="true" aria-labelledby="mtS">
@@ -727,6 +742,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
     </div>
   </div>
 </div>
+<div class="ov" id="ov9" hidden><div class="modal"><div class="mh"><h3 id="editTitle">Час завершення</h3></div><div class="gbody"><label>Доступний варіант завершення <span class="fld"><select id="editShift"></select></span></label><div class="mf"><button class="btn" data-close="ov9" type="button">Скасувати</button><button class="btn primary" id="editSave" type="button">Зберегти</button></div></div></div></div>
 <div class="ov" id="ov6" hidden>
   <div class="modal ftmodal" role="dialog" aria-modal="true" aria-labelledby="mt6">
     <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
@@ -776,18 +792,19 @@ function parseGrid(rows){
   }
   if(hr<0)return null;
   const dates=cols.map(c=>serialToYmd(rows[hr][c]));
-  const people=[];let group='';
+  const people=[];let group='',isLeader=false;
   for(let r=hr+1;r<rows.length;r++){
-    const row=rows[r]||[];const name=typeof row[2]==='string'?row[2].trim():'';
+    const row=rows[r]||[];const name=typeof row[2]==='string'?row[2].trim().replace(/^\*+\s*/, ''):'';
     if(!name)continue;
     if(/^(різниця|кількість)/i.test(name))break;
-    if(/^група/i.test(name)){group=name.replace(/\s*\(.*$/,'');continue}
-    if(/^керівники груп/i.test(name)){group='Керівники груп';continue}
+    if(/^керівники груп/i.test(name)){group='Керівники груп';isLeader=true;continue}
+    if(/^група/i.test(name)){group=name.replace(/\s*\(.*$/,'');isLeader=false;continue}
     if(typeof row[0]!=='number'&&typeof row[1]!=='number')continue;
     const sh={};
     cols.forEach((c,i)=>{const cell=parseCell([row[c],row[c+1],row[c+2],row[c+3]]);if(cell)sh[dates[i]]=cell});
     const where=String(row[3]||'').trim();
-    people.push({id:name,name,group:group||'Без групи',where:/vpn|впн/i.test(where)?'VPN':/офіс/i.test(where)?where.replace(/офіс/i,'Офіс '):'' ,hours:(String(row[4]||'').match(/\d+/)||[''])[0],sh});
+    const hm=String(row[4]||'').match(/\d+(?:[.,]\d+)?/);const hours=hm?hm[0].replace(',','.'):'';
+    people.push({id:name,name,group:group||'Без групи',isLeader,where:/vpn|впн/i.test(where)?'VPN':/офіс/i.test(where)?where.replace(/офіс/i,'Офіс '):'' ,hours,sh});
   }
   if(!people.length)return null;
   return {dates,people};
@@ -837,7 +854,7 @@ function saveMeta(){
   if(!lsSet(LS,{files:fm,main:S.main,sel:S.sel,chats:S.chats,ot:S.ot,rate:S.rate,rank:S.rank,cur:S.cur,colors:S.colors,view:S.view,ft:S.ft,qb:S.qb}))toast('Не вдалося зберегти зміни в браузері (сховище переповнене).');
 }
 function saveFile(k){if(!lsSet(LF+k,S.files[k].data))toast('Файл завеликий для збереження в браузері: після оновлення сторінки його треба буде додати знову.')}
-function index(f){f.map=new Map(f.data.people.map(p=>[p.id,p]));return f}
+function index(f){const people=f.data.people||[];if(!people.some(p=>p.isLeader)){const group1=people.findIndex(p=>/^група\s*1\b/i.test(p.group||''));if(group1>0)people.slice(0,group1).filter(p=>/^(без групи|керівники груп)$/i.test(p.group||'')).forEach(p=>{p.isLeader=true;p.group='Керівники груп'})}f.map=new Map(people.map(p=>[p.id,p]));return f}
 function load(){
   let m=null;try{m=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
   if(m){
@@ -904,6 +921,11 @@ function shiftHours(c,p){
   if(c.r){const m=c.r.match(/(\d+):(\d+)\s*–\s*(\d+):(\d+)/);if(m){const a=+m[1]*60+ +m[2],b=+m[3]*60+ +m[4];return ((b-a+1440)%1440)/60}}
   return +p.hours||8;
 }
+function shiftEndTime(c,p){
+  const start=parseT(c.s),raw=String(p&&p.hours||'').replace(',','.'),hours=Number(raw);
+  if(start!=null&&raw&&Number.isFinite(hours)&&hours>0)return pad(Math.floor((start+hours*60+(hours>=8?60:0))/60)%24)+':'+pad(Math.round((start+hours*60+(hours>=8?60:0))%60));
+  const range=String(c.r||'').match(/\d{1,2}:\d{2}\s*[–-]\s*(\d{1,2}:\d{2})/);return range?range[1]:'';
+}
 
 /* overtime */
 const parseT=s=>{if(!s)return null;const [h,m]=s.split(':').map(Number);return h*60+m};
@@ -937,7 +959,7 @@ function renderSalary(){
     <div class="pr sum"><div><b>Аванс</b><small>виплата ${fdm(S.view,pd.adv)}</small></div><span>${money(c.adv)}</span></div>
     <div class="pr"><div><b>Зміни 16–${last}</b><small>${c.n2} змін · ${fmtH(c.h2)}</small></div><span>${money(c.base2)}</span></div>
     <div class="pr"><div><b>Премія ${c.pct}%</b><small>від усіх змін місяця (${money(c.base1+c.base2)})</small></div><span>${money(c.bonus)}</span></div>
-    <div class="pr"><div><b>Перепрацювання</b><small>${fmtH(c.oh)}</small></div><span>${money(c.om)}</span></div>
+    <div class="pr"><div><b>Переробка</b><small>${fmtH(c.oh)}</small></div><span>${money(c.om)}</span></div>
     ${c.qOn?`<div class="pr"><div><b>Доплата за кількісний</b><small>середнє ${fmtN(c.qAvg)} чат/год${c.qAvg>9?` · +${fmtN(c.qExtra)} чатів × ${QB}`:' · потрібно понад 9'}</small></div><span>${money(c.qMoney)}</span></div>`:''}
     <div class="pr sum"><div><b>Зарплата</b><small>виплата ${fdm(nextYM(S.view),payDates(nextYM(S.view)).sal)}</small></div><span>${money(c.sal)}</span></div>
     <div class="total"><small>Загальна сума</small><b>${money(c.total)}</b></div>
@@ -993,8 +1015,8 @@ function entryHTML(id,d,multi){
   const tip=esc(id+(c.k==='work'?' · '+(c.r||c.s)+(c.l?' · обід '+c.l:'')+(c.b?' · перерва '+c.b:'')+(c.t?' · '+c.t:''):' · '+c.x));
   if(c.k==='work'){
     const time=c.r||c.s;const tg=c.t?`<span class="tag ${tagCls(c.t)}">${esc(c.t)}</span>`:'';
-    const mm=String(c.r||'').match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/),ms=mm?`<span class="ms"><b>${mm[1]}</b><b>${mm[2]}</b></span>`:`<span class="ms"><b>${esc(c.s)}</b></span>`;
-    if(!multi)return `<div class="ent one wk${mc}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">${esc(time)}</span>${tg}</div>${c.l?`<div class="sub">обід ${c.l}${c.b?' · перерва '+c.b:''}</div>`:''}${ms}</div>`;
+    const end=shiftEndTime(c,p),ms=end?`<span class="ms"><b>${esc(c.s)}</b><b>${esc(end)}</b></span>`:`<span class="ms"><b>${esc(c.s)}</b></span>`;
+    if(!multi)return `<div class="ent one wk${mc}" data-edit-shift="${esc(id)}" data-edit-date="${d}" style="--c:${col};cursor:pointer" title="${tip} · натисніть, щоб редагувати"><div class="row"><span class="t">${esc(time)}</span>${tg}</div>${c.l?`<div class="sub">обід ${c.l}${c.b?' · перерва '+c.b:''}</div>`:''}${ms}</div>`;
     return `<div class="ent m${mc}" style="--c:${col}" title="${tip}"><span class="t">${esc(c.s)}</span>${tg}<span class="n">${id===S.main?'★ ':''}${esc(short(id))}</span></div>`;
   }
   const cls=c.k==='off'?'off':'';
@@ -1013,7 +1035,7 @@ function renderCal(){
     const hasFile=!!fileOf(d.slice(0,7));
     let body='';
     if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi)});
-    const ot=S.ot[d];if(S.main&&ot&&otHours(ot)>0)body+=`<div class="otl" title="Перепрацювання">Перепр. +${fmtH(otHours(ot))} ×${parseX(ot.x)}</div>`;
+    const ot=S.ot[d];if(S.main&&ot&&otHours(ot)>0)body+=`<div class="otl" title="Переробка">Переробка +${fmtH(otHours(ot))} ×${parseX(ot.x)}</div>`;
     const mo=out&&(day===1||i===0)?`<span class="mo">${MON3[+d.slice(5,7)-1]}</span>`:'';
     h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${payBadge(d)}${n?(()=>{const lv=chLevel(d,n),ic=lv.cls==='g'?'M2.5 8.5 6 12l7.5-8':lv.cls==='y'?'M3 8h10':'M3.5 3.5l9 9M12.5 3.5l-9 9';return `<span class="cc ${lv.cls||'r'}" title="Закрито чатів: ${n} · норма за день: ${fmtN(lv.norm)}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg></span>`})():''}</div><div class="cb">${body}</div></div>`;
   }
@@ -1070,7 +1092,7 @@ function renderPop(){
 }
 function afterOtChange(){refreshOT();renderCal();renderSalary()}
 
-function renderAll(){renderToday();renderTop();renderChips();renderPays();renderNote();renderCal();renderDays();renderOT();renderSalary();scrollToday()}
+function renderAll(){renderToday();renderTop();renderChips();renderPays();renderNote();renderCal();renderDays();renderOT();renderSalary();if(!$('ov6').hidden)renderFt();scrollToday()}
 function scrollToday(){const t=document.querySelector('.d.today'),box=$('days');if(t)box.scrollTop=Math.max(0,t.offsetTop-box.offsetTop-70);else box.scrollTop=0}
 
 /* people modal */
@@ -1118,6 +1140,8 @@ $('prevM').onclick=()=>go(shiftYm(S.view,-1));
 $('nextM').onclick=()=>go(shiftYm(S.view,1));
 $('todayBtn').onclick=()=>go(todayStr().slice(0,7));
 $('grid').addEventListener('click',e=>{const c=e.target.closest('[data-go]');if(c)go(c.dataset.go)});
+$('grid').addEventListener('click',e=>{const el=e.target.closest('[data-edit-shift]');if(!el||shown().length!==1)return;const id=el.dataset.editShift,d=el.dataset.editDate,p=personAt(id,d);if(!p||!p.sh[d]||p.sh[d].k!=='work')return;window.editingShift={id,d};$('editTitle').textContent=`Час завершення · ${d}`;const all=new Map();Object.values(S.files).forEach(f=>f.data.people.forEach(person=>Object.values(person.sh).forEach(c=>{if(c&&c.k==='work'){const key=JSON.stringify(c);all.set(key,c)}})));const current=p.sh[d],key=JSON.stringify(current);all.set(key,current);$('editShift').innerHTML=[...all.entries()].filter(([,c])=>c.s===current.s).map(([v,c])=>`<option value="${esc(v)}" ${v===key?'selected':''}>${esc(c.r||c.s)}${c.l?' · обід '+c.l:''}${c.b?' · перерва '+c.b:''}${c.t?' · '+c.t:''}</option>`).join('');openM('ov9')});
+$('editSave').onclick=()=>{const x=window.editingShift;if(!x)return;const p=personAt(x.id,x.d);if(!p)return;try{const next=JSON.parse($('editShift').value);if(next.s!==p.sh[x.d].s)return;p.sh[x.d]=next;if(!S.demo)saveFile(x.d.slice(0,7))}catch{return}save();renderAll();closeM('ov9');window.editingShift=null};
 $('note').addEventListener('click',e=>{
   if(e.target.closest('[data-addfile]'))$('fileInp').click();
   const s=e.target.closest('[data-show]');if(s){S.files[s.dataset.show].hidden=false;saveMeta();renderAll()}
@@ -1221,6 +1245,8 @@ function renderToday(){
   const d=todayStr(),p=S.main?personAt(S.main,d):null,c=p?p.sh[d]:null;
   $('tdDate').textContent=WD[dowOf(d)]+' '+pad(+d.slice(8))+'.'+d.slice(5,7)+'.'+d.slice(0,4);
   $('tdWho').textContent=S.main?short(S.main):'';
+  const data=fileOf(d.slice(0,7)),leaders=data?data.data.people.filter(x=>(x.isLeader||x.group==='Керівники груп')&&x.sh[d]&&x.sh[d].k==='work'):[];
+  $('tdLeaders').innerHTML=leaders.map(x=>{const start=x.sh[d].s||((String(x.sh[d].r||'').match(/^\d{1,2}:\d{2}/)||[])[0])||'—';return `<span class="leader-chip"><span>${esc(x.name)}</span><small>${esc(start)}</small></span>`}).join('');$('tdLeadersWrap').hidden=!leaders.length;
   $('tdInfo').innerHTML=!S.main?'<p class="empty-note">Оберіть основного користувача (★ у «Люди»), щоб побачити обід і перерву.</p>'
     :!c?'<p class="empty-note">Немає даних про зміну на сьогодні.</p>'
     :c.k!=='work'?`<p class="empty-note">${esc(c.x)}</p>`
@@ -1336,7 +1362,7 @@ $('ftAddDay').onclick=e=>{e.stopPropagation();renderFtPop();$('ftPop').hidden=!$
 document.addEventListener('click',e=>{if(!e.target.closest('#ov6 .popwrap'))$('ftPop').hidden=true});
 $('ftPop').addEventListener('click',e=>{const d=e.target.dataset.pd;if(!d)return;if(!S.ft[d])S.ft[d]={iv:[{a:'',b:''}],m:0};saveMeta();$('ftPop').hidden=true;renderFt()});
 $('ftOpen').onclick=()=>{$('ftPop').hidden=true;$('ov6').hidden=false;renderFt()};
-const ftClose=()=>{$('ov6').hidden=true};
+const ftClose=()=>{$('ov6').hidden=true;if(document.body.dataset.tab==='ft'){document.body.dataset.tab='cal';document.querySelectorAll('#mNav [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab==='cal'))}};
 $('ftClose').onclick=ftClose;$('ov6').addEventListener('mousedown',e=>{if(e.target===$('ov6'))ftClose()});
 /* zoom a block to focus on it */
 let zoomEl=null;
@@ -1418,11 +1444,13 @@ renderAll();initAuth();
   }
   $('mNav').addEventListener('click',e=>{
     const b=e.target.closest('[data-tab]');if(!b)return;
-    if(b.dataset.tab==='ft'){$('ftOpen').click();return}
+    if(b.dataset.tab==='ft'){$('ov6').hidden=false;$('ftPop').hidden=true;renderFt();setTab('ft');return}
+    if(b.dataset.tab==='templates'){location.href='templates.html';return}
+    $('ov6').hidden=true;
     setTab(b.dataset.tab);
   });
   /* month title in non-calendar tabs: keep "section + month" in sync after any re-render */
-  const _rt=renderTop;renderTop=function(){_rt();if(body.dataset.tab!=='cal'){const t=body.dataset.tab,mn=monthName(S.view).split(' ');$('mTM').textContent=({today:'Сьогодні',chats:'Закрито чатів',ot:'Перепрацювання',pay:'Зарплата'})[t]||'';$('mTY').textContent=mn[0].toLowerCase()+' '+mn.slice(1).join(' ')}};
+  const _rt=renderTop;renderTop=function(){_rt();if(body.dataset.tab!=='cal'){const t=body.dataset.tab,mn=monthName(S.view).split(' ');$('mTM').textContent=({today:'Сьогодні',chats:'Закрито чатів',ot:'Переробка',pay:'Зарплата',ft:'Вільний час'})[t]||'';$('mTY').textContent=mn[0].toLowerCase()+' '+mn.slice(1).join(' ')}};
   $('mTitle').onclick=()=>{$('todayBtn').click()};
   $('mPrev').onclick=()=>$('prevM').click();
   $('mNext').onclick=()=>$('nextM').click();

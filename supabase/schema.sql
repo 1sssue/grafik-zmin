@@ -1,5 +1,7 @@
 -- Виконайте цей скрипт у Supabase: SQL Editor -> New query -> Run
 -- 1) ВПИШІТЬ пошти трьох адміністраторів нижче (рядки з example.com)
+-- Шаблони відповідей використовують reply_templates та reply_template_state нижче;
+-- після оновлення файлу запустіть цей скрипт у SQL Editor ще раз.
 
 create table if not exists public.admin_emails (email text primary key);
 insert into public.admin_emails (email) values
@@ -21,6 +23,55 @@ create table if not exists public.user_state (
   data jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
+
+-- Шаблони відповідей: спільні шаблони доступні всім авторизованим користувачам,
+-- базові та приватні шаблони бачить лише їхній автор.
+create table if not exists public.reply_templates (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  body text not null,
+  keywords text[] not null default '{}',
+  border_color text not null default '#7a5af8',
+  is_shared boolean not null default false,
+  is_basic boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists reply_templates_shared_idx on public.reply_templates (is_shared, created_at desc) where is_shared and not is_basic;
+create index if not exists reply_templates_owner_idx on public.reply_templates (owner_id, created_at desc);
+
+-- Обране, закріплення й власне сортування зберігаються окремо для кожного користувача.
+create table if not exists public.reply_template_state (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  template_id uuid not null references public.reply_templates(id) on delete cascade,
+  pinned boolean not null default false,
+  favorite boolean not null default false,
+  sort_orders jsonb not null default '{}'::jsonb,
+  primary key (user_id, template_id)
+);
+
+alter table public.reply_templates enable row level security;
+alter table public.reply_template_state enable row level security;
+grant select, insert, update, delete on public.reply_templates to authenticated;
+grant select, insert, update, delete on public.reply_template_state to authenticated;
+
+drop policy if exists "templates: own and shared read" on public.reply_templates;
+create policy "templates: own and shared read" on public.reply_templates
+  for select to authenticated using (owner_id = auth.uid() or (is_shared and not is_basic));
+drop policy if exists "templates: insert own" on public.reply_templates;
+create policy "templates: insert own" on public.reply_templates
+  for insert to authenticated with check (owner_id = auth.uid());
+drop policy if exists "templates: update own" on public.reply_templates;
+create policy "templates: update own" on public.reply_templates
+  for update to authenticated using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+drop policy if exists "templates: delete own" on public.reply_templates;
+create policy "templates: delete own" on public.reply_templates
+  for delete to authenticated using (owner_id = auth.uid());
+
+drop policy if exists "template state: own rows" on public.reply_template_state;
+create policy "template state: own rows" on public.reply_template_state
+  for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 create or replace function public.is_admin() returns boolean
 language sql stable security definer set search_path = public as $$
