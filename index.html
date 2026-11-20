@@ -49,7 +49,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .brand{display:flex;align-items:center;gap:10px;font:800 18px var(--font-display);letter-spacing:-.01em;margin-right:6px}
 .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
 .spacer{flex:1}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:500;transition:background .15s,border-color .15s}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:500;text-decoration:none;color:var(--fg);transition:background .15s,border-color .15s}
 .btn:hover{background:var(--surface-2);border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.primary:hover{filter:brightness(1.08)}
@@ -306,8 +306,8 @@ body{display:flex;flex-direction:column}
 main.wrap{flex:1;min-height:0;display:flex;flex-direction:column}
 main.wrap>*{flex:none}
 main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
-.ftbar{display:flex;justify-content:center;gap:12px;padding:6px 0 12px}
-.ftbar .btn{width:190px;height:40px;justify-content:center}
+.ftbar{display:flex;justify-content:center;gap:12px;padding:12px 0}
+.ftbar .btn{width:190px;min-width:190px;height:40px;justify-content:center;transform:translateY(-8px)}
 .ftbar .btn:disabled{opacity:.55;cursor:default}
 .ivs{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:6px}
 @media (max-width:1150px){
@@ -315,7 +315,7 @@ main.wrap>.layout{flex:1 1 0;min-height:0;height:auto}
   body{display:block}
   main.wrap{display:block}
   main.wrap>.layout{height:auto}
-  .ftbar{padding-bottom:20px}
+  .ftbar{padding-bottom:12px}
 }
 /* round 7 */
 .cal,.blk,.today{position:relative}
@@ -657,7 +657,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
     </section>
     </div></div>
   </div>
-<div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html">Шаблони</a><button class="btn" id="soonBtn" type="button" disabled title="Незабаром">Скоро</button></div>
+  <div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3h3M6 8h4M6 10.5h4"/></svg>Шаблони</a><button class="btn" id="soonBtn" type="button" disabled title="Незабаром">Скоро</button></div>
 </main>
 
 <!-- people -->
@@ -708,7 +708,7 @@ body.zchart .card.side.zoom{left:calc(50% - 288px)!important}
   </div>
 </div>
 
-<nav class="mnav" id="mNav" aria-label="Розділи"><button type="button" data-tab="cal" class="on" aria-label="Календар"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Календар</span></button><button type="button" data-tab="today" aria-label="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg><span>Сьогодні</span></button><button type="button" data-tab="chats" aria-label="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg><span>Закрито чатів</span></button><button type="button" data-tab="ot" aria-label="Переробка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg><span>Переробка</span></button><button type="button" data-tab="pay" aria-label="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg><span>Зарплата</span></button><button type="button" data-tab="ft" id="mFtTab" hidden aria-label="Вільний час"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 5.5 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 5.5-4.5 9s4.5 4 4.5 9"/></svg><span>Вільний час</span></button><button type="button" data-tab="templates" aria-label="Шаблони"><span>▦</span><span>Шаблони</span></button></nav>
+<nav class="mnav" id="mNav" aria-label="Розділи"><button type="button" data-tab="cal" class="on" aria-label="Календар"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Календар</span></button><button type="button" data-tab="today" aria-label="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg><span>Сьогодні</span></button><button type="button" data-tab="chats" aria-label="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg><span>Закрито чатів</span></button><button type="button" data-tab="ot" aria-label="Переробка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg><span>Переробка</span></button><button type="button" data-tab="pay" aria-label="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg><span>Зарплата</span></button><button type="button" data-tab="ft" id="mFtTab" hidden aria-label="Вільний час"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 5.5 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 5.5-4.5 9s4.5 4 4.5 9"/></svg><span>Вільний час</span></button></nav>
 <button class="mfab" id="mFab" type="button" aria-label="Додати людей для відстеження"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.4-3.4 2.9-5.4 6.2-5.4s5.8 2 6.2 5.4M18.5 7.5v6M15.5 10.5h6"/></svg></button>
 <div class="ov" id="ovS" hidden>
   <div class="modal sheet" role="dialog" aria-modal="true" aria-labelledby="mtS">
@@ -1318,7 +1318,7 @@ async function enter(user){
   if(st&&st.data&&st.data.meta)applyCloud(st.data);
   READY=true;if(!(st&&st.data&&st.data.meta))cloudPush();
   $('gate').hidden=true;$('meMail').textContent=ME.email;$('meMail').hidden=false;$('outBtn').hidden=false;
-  $('admBtn').hidden=ME.role!=='admin';$('dataBtn').hidden=false;$('ftOpen').hidden=!(ME.role==='admin'||ME.can_free_time);
+  $('admBtn').hidden=ME.role!=='admin';$('dataBtn').hidden=false;$('ftOpen').hidden=!(ME.role==='admin'||ME.can_free_time);if(location.hash==='#data')$('dataBtn').click();else if(location.hash==='#admin'&&ME.role==='admin')$('admBtn').click();
 }
 $('outBtn').onclick=async()=>{await sb.auth.signOut();clearLocal();localStorage.removeItem('shifts.owner');location.reload()};
 /* admin */
@@ -1445,7 +1445,6 @@ renderAll();initAuth();
   $('mNav').addEventListener('click',e=>{
     const b=e.target.closest('[data-tab]');if(!b)return;
     if(b.dataset.tab==='ft'){$('ov6').hidden=false;$('ftPop').hidden=true;renderFt();setTab('ft');return}
-    if(b.dataset.tab==='templates'){location.href='templates.html';return}
     $('ov6').hidden=true;
     setTab(b.dataset.tab);
   });
