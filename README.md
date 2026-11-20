@@ -92,3 +92,8 @@ git push -u origin main
 ## Нотатки
 - Якщо відкрити сайт на двох пристроях одночасно, діє принцип «останній запис перемагає».
 - Для читання `.xlsx` і входу потрібен інтернет (бібліотеки з CDN).
+
+## Shared schedule
+1. For an existing database, run supabase/shared_schedule_files.sql in Supabase SQL Editor.
+2. An administrator adds a local Excel file through Files → Add Excel. The parsed schedule is stored in Supabase and shown to all authenticated users.
+3. Only administrators can add, hide, or delete schedules. Supabase RLS also enforces these permissions.
