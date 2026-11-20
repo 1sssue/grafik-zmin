@@ -763,6 +763,23 @@ $('impInp').onchange=async e=>{
 
 $('qbChk').onchange=e=>{S.qb[S.view]=e.target.checked;saveMeta();renderSalary();refreshToday();refreshChats();renderCal()};
 
+// Desktop module visibility is a local presentation preference; mobile tabs remain unchanged.
+const DESKTOP_MODULES_KEY='shifts.desktopModules.v1';
+const desktopModules={today:true,chats:true,ot:true,pay:true};
+try{Object.assign(desktopModules,JSON.parse(localStorage.getItem(DESKTOP_MODULES_KEY)||'{}'))}catch{}
+function applyDesktopModules(){
+  const layout=document.querySelector('.layout');if(!layout)return;
+  layout.classList.toggle('module-hide-today',!desktopModules.today);
+  layout.classList.toggle('module-hide-chats',!desktopModules.chats);
+  layout.classList.toggle('module-hide-ot',!desktopModules.ot);
+  layout.classList.toggle('module-hide-pay',!desktopModules.pay);
+  document.querySelectorAll('[data-module-toggle]').forEach(input=>input.checked=desktopModules[input.dataset.moduleToggle]!==false);
+}
+applyDesktopModules();
+$('moduleMenuBtn').addEventListener('click',()=>{const menu=$('moduleMenu'),open=menu.hidden;menu.hidden=!open;$('moduleMenuBtn').setAttribute('aria-expanded',String(open))});
+$('moduleMenu').addEventListener('change',e=>{const input=e.target.closest('[data-module-toggle]');if(!input)return;desktopModules[input.dataset.moduleToggle]=input.checked;try{localStorage.setItem(DESKTOP_MODULES_KEY,JSON.stringify(desktopModules))}catch{}applyDesktopModules()});
+document.addEventListener('click',e=>{if(!e.target.closest('#moduleMenuWrap')){$('moduleMenu').hidden=true;$('moduleMenuBtn').setAttribute('aria-expanded','false')}});
+
 $('rate').value=S.rate!=null?S.rate:(S.demo?140:'');
 $('rank').value=S.rank;
 renderAll();initAuth();

@@ -65,6 +65,18 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* layout */
 .layout{display:grid;grid-template-columns:minmax(280px,2fr) minmax(0,8fr) minmax(280px,2fr);gap:16px;align-items:stretch;height:calc(100dvh - 140px);min-height:640px;padding-block:12px 16px}
 .layout>*{min-height:0}
+ .module-menu-wrap{display:none}
+@media (min-width:1151px){
+  .module-menu-wrap{position:relative;display:inline-flex}
+  .module-menu{position:absolute;z-index:30;right:0;top:calc(100% + 8px);min-width:190px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+  .module-menu[hidden]{display:none}
+  .module-menu label{display:flex;align-items:center;gap:9px;padding:8px;border-radius:8px;white-space:nowrap;cursor:pointer}
+  .module-menu label:hover{background:var(--surface-2)}
+  .layout.module-hide-today #todayCard,.layout.module-hide-chats .col-in>.side,.layout.module-hide-ot #otCard,.layout.module-hide-pay #payCard{display:none!important}
+  .layout:not(.module-hide-today).module-hide-chats #todayCard{flex:1 1 0;min-height:0;overflow:auto}
+  .layout.module-hide-today:not(.module-hide-chats) .col-in>.side{flex:1 1 0}
+  .layout.module-hide-ot #payCard,.layout.module-hide-pay #otCard{flex:1 1 0;min-height:0}
+}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
 
 /* calendar */

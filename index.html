@@ -91,6 +91,15 @@
         <button class="btn sm" id="todayBtn" type="button" style="margin-left:6px">Сьогодні</button>
         <span class="spacer"></span>
         <button class="btn sm" id="filesBtn" type="button">Файли <span class="badge" id="fileCount">0</span></button>
+        <div class="module-menu-wrap" id="moduleMenuWrap">
+          <button class="btn sm" id="moduleMenuBtn" type="button" aria-expanded="false" aria-controls="moduleMenu">Модулі</button>
+          <div class="module-menu" id="moduleMenu" hidden>
+            <label><input type="checkbox" data-module-toggle="today" checked> Сьогодні</label>
+            <label><input type="checkbox" data-module-toggle="chats" checked> Чати загальні</label>
+            <label><input type="checkbox" data-module-toggle="ot" checked> Переробка</label>
+            <label><input type="checkbox" data-module-toggle="pay" checked> ЗП</label>
+          </div>
+        </div>
         <button class="btn primary sm" id="upBtn" type="button" hidden><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"/></svg><span class="lblt">Додати файл</span></button>
         <button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
       </div>
