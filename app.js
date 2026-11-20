@@ -561,7 +561,7 @@ $('themeBtn').onclick=()=>{const n=effTheme()==='dark'?'light':'dark';document.d
 initTheme();load();
 
 /* ===== cloud: auth, database sync, admin, free time ===== */
-const CFG=window.APP_CONFIG||{};let sb=null,ME=null,READY=false,pushT=null;const sharedSchedules={};
+const CFG=window.APP_CONFIG||{};let sb=null,ME=null,READY=false,pushT=null,IS_MAIN_ADMIN=false,MAIN_ADMIN_EMAILS=[],ADMIN_EXCEPTIONS_OPEN=false;const sharedSchedules={};
 const freshS=()=>({files:{},demo:true,demoF:null,demoChats:{},view:'',main:'',sel:[],chats:{},ot:{},rate:null,rank:'spec',cur:'UAH',colors:{},ft:{},qb:{}});
 function clearLocal(){Object.keys(localStorage).filter(k=>k===LS||k.startsWith(LF)||k==='shifts.v1').forEach(k=>localStorage.removeItem(k))}
 function blob(){const fm={},files={};Object.keys(S.files).forEach(k=>{const f=S.files[k];fm[k]={name:f.name,loadedAt:f.loadedAt,hidden:f.hidden,sharedVersion:f.sharedVersion,sourceUrl:f.sourceUrl,sourceFileId:f.sourceFileId};files[k]=f.data});
@@ -601,7 +601,7 @@ async function initAuth(){
 }
 $('gSend').onclick=async()=>{const email=$('gEmail').value.trim().toLowerCase();if(!email)return;if(!sb)return;$('gSend').disabled=true;
   const{error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});$('gSend').disabled=false;
-  if(error){gMsg('Помилка: '+error.message);return}
+  if(error){const msg=error.message||'Помилка входу';gMsg(/database error saving new user|registration is allowed only/i.test(msg)?'Нові облікові записи можуть створити лише адреси @novaposhta.ua або адреси, попередньо дозволені головним адміністратором.':'Помилка: '+msg);return}
   gMsg('Код надіслано на '+email+'. Введіть його нижче.');$('gStep1').hidden=true;$('gStep2').hidden=false;$('gCode').focus()};
 $('gBack').onclick=()=>{$('gStep2').hidden=true;$('gStep1').hidden=false;gMsg('Введіть пошту, ми надішлемо одноразовий код для входу.')};
 $('gVerify').onclick=async()=>{const email=$('gEmail').value.trim().toLowerCase(),token=$('gCode').value.trim();if(!token)return;
@@ -614,7 +614,7 @@ async function enter(user){
   localStorage.setItem('shifts.owner',user.id);
   const{data:pr}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
   if(!pr){gMsg('Профіль не знайдено. Перевірте, що виконано supabase/schema.sql.');$('gStep1').hidden=false;return}
-  ME=pr;document.body.dataset.role=ME.role;
+  ME=pr;document.body.dataset.role=ME.role;try{const{data:main}=await sb.rpc('is_super_admin');IS_MAIN_ADMIN=main===true}catch(e){IS_MAIN_ADMIN=false}
   const{data:st}=await sb.from('user_state').select('data').eq('user_id',user.id).maybeSingle();
   if(st&&st.data&&st.data.meta)applyCloud(st.data);
   READY=true;if(!(st&&st.data&&st.data.meta))cloudPush();
@@ -623,17 +623,51 @@ async function enter(user){
 }
 $('outBtn').onclick=async()=>{await sb.auth.signOut();clearLocal();localStorage.removeItem('shifts.owner');location.reload()};
 /* admin */
+async function callAdmin(action,extra={}){
+  const{data,error}=await sb.functions.invoke('admin-management',{body:{action,...extra}});
+  if(error){let msg=error.message||'Помилка адміністративної дії';try{const r=error.context;if(r&&typeof r.json==='function'){const j=await r.json();msg=j.error||msg}}catch(e){}toast(msg);return null}
+  if(data&&data.error){toast(data.error);return null}return data;
+}
 async function renderAdm(){
-  const{data,error}=await sb.from('profiles').select('*').order('email');
+  const[{data,error},controls]=await Promise.all([
+    sb.from('profiles').select('*').order('email'),
+    callAdmin('get_controls')
+  ]);
   if(error){$('admList').textContent=error.message;return}
-  $('admList').innerHTML=data.map(u=>`<div class="arow"><span>${esc(u.email)} <small class="sub2">${u.role==='admin'?'адмін':''}</small></span><label><input type="checkbox" data-uid="${u.id}" ${u.role==='admin'||u.can_free_time?'checked':''} ${u.role==='admin'?'disabled':''}> Вільний час</label></div>`).join('')||'<p class="empty-note">Користувачів ще немає.</p>';
+  if(controls){IS_MAIN_ADMIN=!!controls.caller_is_main;MAIN_ADMIN_EMAILS=controls.main_admin_emails||[]}else{IS_MAIN_ADMIN=false;MAIN_ADMIN_EMAILS=[]}
+  $('exceptionToggle').hidden=!IS_MAIN_ADMIN;
+  $('adminAccessTools').hidden=!IS_MAIN_ADMIN||!ADMIN_EXCEPTIONS_OPEN;
+  $('exceptionToggle').textContent=ADMIN_EXCEPTIONS_OPEN?'Закрити винятки':'Керувати винятками для пошти';
+  $('exceptionRows').innerHTML=IS_MAIN_ADMIN?(controls.exceptions||[]).map(x=>`<div class="admin-access-row"><span>${esc(x.email)}</span><button class="btn ghost sm" type="button" data-exception-remove="${esc(x.email)}">Видалити виняток</button></div>`).join('')||'<small class="hint">Винятків поки немає.</small>':'';
+  const warning=!controls?'<p class="empty-note">Не вдалося завантажити керування доступом. Перевірте міграцію admin_access.sql і розгортання Edge Function admin-management.</p>':'';
+  const mainUsers=[],admins=[],regularUsers=[];
+  data.forEach(u=>{const primary=MAIN_ADMIN_EMAILS.includes(String(u.email||'').toLowerCase());if(primary)mainUsers.push(u);else if(u.role==='admin')admins.push(u);else regularUsers.push(u)});
+  const row=u=>{
+    const email=String(u.email||''),primary=MAIN_ADMIN_EMAILS.includes(email.toLowerCase()),isAdmin=u.role==='admin';
+    const badge=primary?'Головний адміністратор':isAdmin?'Адміністратор':'Користувач';
+    const roleAction=IS_MAIN_ADMIN&&!primary?`<button class="btn sm" type="button" data-admin-action="${isAdmin?'revoke':'grant'}" data-uid="${u.id}">${isAdmin?'Забрати адміна':'Надати адміна'}</button>`:'';
+    const freeTime=`<label><input type="checkbox" data-ft-user="${u.id}" ${isAdmin||u.can_free_time?'checked':''} ${isAdmin?'disabled':''}> Вільний час</label>`;
+    const canDelete=!primary&&u.id!==ME.id&&(!isAdmin||IS_MAIN_ADMIN);
+    const remove=canDelete?`<button class="btn ghost sm danger" type="button" data-admin-action="delete" data-uid="${u.id}">Видалити профіль</button>`:'';
+    return `<div class="admin-user-row"><span class="admin-user-label">${esc(email)} <small class="sub2">${badge}</small></span><div class="admin-user-actions">${freeTime}${roleAction}${remove}</div></div>`;
+  };
+  const section=(title,items)=>`<section class="admin-section"><h4>${title}<span>${items.length}</span></h4>${items.length?items.map(row).join(''):'<p class="empty-note" style="padding:8px 12px">Немає користувачів у цьому розділі.</p>'}</section>`;
+  $('admList').innerHTML=warning+section('Головні адміністратори',mainUsers)+section('Адміністратори',admins)+section('Звичайні користувачі',regularUsers);
 }
 $('admBtn').onclick=()=>{$('ov5').hidden=false;renderAdm()};
 $('admClose').onclick=()=>{$('ov5').hidden=true};
-$('admList').addEventListener('change',async e=>{const t=e.target;if(!t.dataset.uid)return;
-  const{error}=await sb.from('profiles').update({can_free_time:t.checked}).eq('id',t.dataset.uid);
-  if(error){toast('Не вдалося змінити: '+error.message);t.checked=!t.checked}else toast(t.checked?'Доступ надано':'Доступ прибрано')});
-const nextYM=ym=>{const y=+ym.slice(0,4),m=+ym.slice(5);return m===12?(y+1)+'-01':y+'-'+pad(m+1)};
+$('exceptionToggle').onclick=()=>{ADMIN_EXCEPTIONS_OPEN=!ADMIN_EXCEPTIONS_OPEN;$('adminAccessTools').hidden=!ADMIN_EXCEPTIONS_OPEN;$('exceptionToggle').textContent=ADMIN_EXCEPTIONS_OPEN?'Закрити винятки':'Керувати винятками для пошти'};
+$('exceptionAdd').onclick=async()=>{const email=$('exceptionEmail').value.trim();if(!email)return;const ok=await callAdmin('add_exception',{email});if(ok){$('exceptionEmail').value='';toast('Виняток додано');renderAdm()}};
+$('exceptionEmail').onkeydown=e=>{if(e.key==='Enter')$('exceptionAdd').click()};
+$('admList').addEventListener('change',async e=>{const t=e.target.closest('[data-ft-user]');if(!t)return;const old=!t.checked,ok=await callAdmin('set_free_time',{user_id:t.dataset.ftUser,can_free_time:t.checked});if(!ok)t.checked=old;else toast(t.checked?'Доступ до вільного часу надано':'Доступ до вільного часу прибрано')});
+$('admList').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-admin-action]');if(!b)return;const action=b.dataset.adminAction,userId=b.dataset.uid;
+  if(action==='delete'&&!confirm('Видалити обліковий запис і всі пов’язані з ним дані? Цю дію не можна скасувати.'))return;
+  if(action==='revoke'&&!confirm('Забрати права адміністратора в цього користувача?'))return;
+  const ok=action==='delete'?await callAdmin('delete_user',{user_id:userId}):await callAdmin('set_admin',{user_id:userId,can_free_time:action==='grant'});
+  if(ok){toast(action==='delete'?'Обліковий запис видалено':action==='grant'?'Права адміністратора надано':'Права адміністратора забрано');renderAdm()}
+});
+$('exceptionRows').addEventListener('click',async e=>{const b=e.target.closest('[data-exception-remove]');if(!b)return;if(!confirm(`Забрати дозвіл для ${b.dataset.exceptionRemove}?`))return;const ok=await callAdmin('remove_exception',{email:b.dataset.exceptionRemove});if(ok){toast('Виняток видалено');renderAdm()}});const nextYM=ym=>{const y=+ym.slice(0,4),m=+ym.slice(5);return m===12?(y+1)+'-01':y+'-'+pad(m+1)};
 const fdm=(ym,o)=>WD[dowOf(ym+'-'+pad(o.day))]+' '+pad(o.day)+'.'+ym.slice(5)+(ym.slice(0,4)!==S.view.slice(0,4)?'.'+ym.slice(0,4):'');
 /* free time */
 const fmtMin=m=>m>=60?Math.floor(m/60)+' год'+(m%60?' '+m%60+' хв':''):m+' хв';

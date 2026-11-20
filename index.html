@@ -168,7 +168,7 @@
     <div class="mh"><h3>Графік змін</h3></div>
     <div class="gbody">
       <p class="hint" id="gMsg">Завантаження…</p>
-      <div id="gStep1" class="gbody" hidden><input class="search" type="email" id="gEmail" placeholder="name@example.com" autocomplete="email"><button class="btn primary" id="gSend" type="button" style="justify-content:center">Надіслати код</button></div>
+      <div id="gStep1" class="gbody" hidden><input class="search" type="email" id="gEmail" placeholder="name@example.com" autocomplete="email"><small class="hint">Нові облікові записи: лише @novaposhta.ua. Інші адреси має попередньо дозволити головний адміністратор.</small><button class="btn primary" id="gSend" type="button" style="justify-content:center">Надіслати код</button></div>
       <div id="gStep2" class="gbody" hidden><input class="search" id="gCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Код з листа"><button class="btn primary" id="gVerify" type="button" style="justify-content:center">Увійти</button><button class="btn ghost sm" id="gBack" type="button">Інша пошта</button></div>
     </div>
   </div>
@@ -176,7 +176,14 @@
 <div class="ov" id="ov5" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt5">
     <div class="mh"><h3 id="mt5">Адмін-панель <button class="btn ghost sm" id="admClose" type="button" aria-label="Закрити">✕</button></h3></div>
-    <p class="hint">Користувачі, які вже входили. Для кожного можна видати або забрати доступ до блоку «Вільний час». Адміністратори задаються в базі даних.</p>
+    <p class="hint">Керуйте доступом користувачів. Головні адміністратори можуть надавати права адміністратора та дозволяти окремі адреси з інших доменів.</p>
+    <button class="btn sm" id="exceptionToggle" type="button" hidden>Керувати винятками для пошти</button>
+    <section class="admin-access-tools" id="adminAccessTools" hidden>
+      <b>Винятки для пошти з інших доменів</b>
+      <div class="admin-access-entry"><input class="search" id="exceptionEmail" type="email" placeholder="name@example.com"><button class="btn primary sm" id="exceptionAdd" type="button">Додати виняток</button></div>
+      <small class="hint">Дозволено лише цій адресі; основне правило реєстрації — @novaposhta.ua.</small>
+      <div id="exceptionRows"></div>
+    </section>
     <div class="mb" id="admList"></div>
   </div>
 </div>
