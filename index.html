@@ -22,8 +22,9 @@
 <header class="top"><div class="wrap">
   <div class="brand"><span class="mark"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="2.5"/><path d="M2 7h12M5.5 1.5v3M10.5 1.5v3"/></svg></span>Графік змін</div>
   <div class="spacer"></div>
-  <span class="sub2" id="meMail" hidden></span>
-  <button class="btn icon-btn" id="themeBtn" type="button" aria-label="Змінити тему" title="Світла / темна тема"></button>
+  <span class="sub2" id="meMail" hidden></span><span class="top-mail-slot" id="topMailSlot" hidden aria-hidden="true"></span>
+  <div class="theme-menu-wrap"><button class="btn icon-btn" id="themeBtn" type="button" aria-label="Обрати тему" title="Обрати тему" aria-haspopup="true" aria-expanded="false"></button><div class="theme-menu" id="themeMenu" hidden></div></div>
+  <div class="top-loading-actions" id="topLoadingActions" hidden aria-hidden="true"><button class="btn" disabled>Адмін</button><button class="btn" disabled>Імпорт / Експорт</button><button class="btn" disabled>Вийти</button></div>
   <button class="btn" id="admBtn" type="button" hidden>Адмін</button>
   <button class="btn" id="dataBtn" type="button" hidden>Імпорт / Експорт</button>
   <button class="btn" id="outBtn" type="button" hidden>Вийти</button>
@@ -33,10 +34,11 @@
 
 
 <div class="mtop" id="mTop">
-  <button class="mib mch" id="mPrev" type="button" aria-label="Попередній місяць"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="mib mch" id="mPrev" type="button" aria-label="Попередній місяць"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
   <button class="mtitle" id="mTitle" type="button" aria-label="До поточного місяця"><span id="mTM">—</span><small id="mTY"></small></button>
-  <button class="mib mch" id="mNext" type="button" aria-label="Наступний місяць"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button class="mib mch" id="mNext" type="button" aria-label="Наступний місяць"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
   <button class="mib" id="mFiles" type="button" aria-label="Файли"><svg viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M14 3.5V8h4.5M8.5 13h7M8.5 16.5h7"/></svg></button>
+  <button class="mib" id="mOverview" type="button" aria-label="Огляд всіх змін"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11M6 6.5h.01M12 6.5h.01M18 6.5h.01"/></svg></button>
   <button class="mib" id="mSet" type="button" aria-label="Налаштування"><svg viewBox="0 0 24 24"><path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11M21 18h-1"/><circle cx="16" cy="6" r="2.3"/><circle cx="10" cy="12" r="2.3"/><circle cx="18" cy="18" r="2.3"/></svg></button>
 </div>
 
@@ -47,6 +49,7 @@
     <span class="lbl">Відстежую</span>
     <span id="chips" style="display:contents"></span>
     <button class="btn sm" id="addBtn" type="button">+ Люди</button>
+    <span class="app-loading web-loading" id="webLoading" hidden><i></i>Завантаження графіка…</span>
     <span class="spacer"></span><span class="pays" id="pays"></span>
   </section>
 
@@ -70,7 +73,7 @@
     <aside class="card side" aria-label="Закриті чати"><div class="side-in">
       <div class="sidehead">
         <div><h2>Закрито чатів</h2><div class="big" style="margin-top:6px"><b id="sumN">0</b><span id="sumLbl">за місяць</span></div></div>
-        <div class="hbtns"><button class="btn sm" id="chartToggle" type="button">Сховати графік</button><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
+        <div class="hbtns"><button class="btn sm" id="chartToggle" type="button">Сховати графік</button><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
       </div>
       <div class="stats">
         <div class="stat"><small>Середнє на день</small><b id="avgN">—</b></div>
@@ -85,12 +88,12 @@
 
     <section class="card cal" aria-label="Календар змін">
       <div class="calhead">
-        <button class="nav" id="prevM" type="button" aria-label="Попередній місяць">‹</button>
+        <button class="nav" id="prevM" type="button" aria-label="Попередній місяць"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button>
         <h2 id="monthTitle">—</h2>
-        <button class="nav" id="nextM" type="button" aria-label="Наступний місяць">›</button>
+        <button class="nav" id="nextM" type="button" aria-label="Наступний місяць"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button>
         <button class="btn sm" id="todayBtn" type="button" style="margin-left:6px">Сьогодні</button>
+        <button class="btn primary sm overview-open" id="overviewOpen" type="button">Огляд всіх змін</button>
         <span class="spacer"></span>
-        <button class="btn sm" id="filesBtn" type="button">Файли <span class="badge" id="fileCount">0</span></button>
         <div class="module-menu-wrap" id="moduleMenuWrap">
           <button class="btn sm" id="moduleMenuBtn" type="button" aria-expanded="false" aria-controls="moduleMenu">Модулі</button>
           <div class="module-menu" id="moduleMenu" hidden>
@@ -100,13 +103,15 @@
             <label><input type="checkbox" data-module-toggle="pay" checked> ЗП</label>
           </div>
         </div>
-        <button class="btn primary sm" id="upBtn" type="button" hidden><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2"/></svg><span class="lblt">Додати файл</span></button>
-        <button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button>
+        <button class="btn sm" id="filesBtn" type="button">Файли <span class="badge" id="fileCount">0</span></button>
+        <button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
       </div>
+      <div class="zoom-people" id="zoomPeople" hidden><b>Відстежую</b><span></span></div>
       <div id="note"></div>
       <div class="legend" id="legend"></div>
       <div class="dow"><div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Нд</div></div>
       <div class="grid" id="grid"></div>
+      <div class="app-loading mobile-loading" id="mobileLoading" hidden aria-label="Завантаження графіка"><i></i></div>
     </section>
 
 
@@ -114,7 +119,7 @@
     <section class="card blk" id="otCard" aria-label="Переробка">
       <div class="bh">
         <div><h2>Переробка</h2><div class="sub2" id="otMonth"></div></div>
-        <div class="hbtns"><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути">⤢</button></div>
+        <div class="hbtns"><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
       </div>
       <div class="ftop"><div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div><div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div></div></div>
       <div class="otlist" id="otList"></div>
@@ -124,7 +129,7 @@
     <section class="card blk" id="payCard" aria-label="Розрахунок зарплати">
       <div class="bh"><h2>Розрахунок зарплати</h2><span class="sub2" id="payWho"></span></div>
       <div class="inputs">
-        <label>Ставка за годину<span class="fld"><input id="rate" type="number" min="0" step="any" inputmode="decimal" placeholder="0"><i id="curLbl"></i></span></label>
+        <label>Ставка/год<span class="fld rate-field"><input id="rate" type="number" min="0" step="any" inputmode="decimal" placeholder="0"><i id="curLbl"></i></span></label>
         <label>Розряд фахівця<span class="fld"><select id="rank"></select></span></label>
       </div>
       <label class="chk"><input type="checkbox" id="qbChk"> Вихожу на доплату по кількісному</label>
@@ -132,8 +137,22 @@
     </section>
     </div></div>
   </div>
-  <div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3h3M6 8h4M6 10.5h4"/></svg>Шаблони</a><button class="btn" id="soonBtn" type="button" disabled title="Незабаром">Скоро</button></div>
+  <div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3h3M6 8h4M6 10.5h4"/></svg>Шаблони</a><button class="btn contact-admin" type="button" data-contact-open aria-label="Контакти адміністратора"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 7 8-7"/></svg></button></div>
 </main>
+<div class="contact-overlay" id="contactOverlay" hidden><section class="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contactTitle"><button class="contact-close" type="button" data-contact-close aria-label="Закрити">×</button><h2 id="contactTitle">Побажання щодо покращення сайту</h2><div class="contact-details"><b>Солонецький Роман</b><div class="contact-email"><span>solonetskyi.r@novaposhta.ua</span><button type="button" data-copy-email aria-label="Копіювати пошту" title="Копіювати">⧉</button></div></div></section></div>
+
+<!-- overview -->
+<div class="ov overview-overlay" id="ovOverview" hidden>
+  <section class="overview-panel" role="dialog" aria-modal="true" aria-labelledby="overviewTitle">
+    <header class="overview-head">
+      <div class="overview-title"><h2 id="overviewTitle">Огляд змін</h2><span class="sub2" id="overviewRange"></span></div>
+      <button class="btn ghost sm" id="overviewClose" type="button" aria-label="Закрити огляд">✕</button>
+      <div class="overview-filters"><input class="search" id="overviewSearch" type="search" placeholder="Знайти фахівця" autocomplete="off"><select class="search" id="overviewGroup" aria-label="Фільтр за групою"><option value="">Усі групи</option></select></div>
+    </header>
+    <div class="overview-scroll" id="overviewScroll"><div id="overviewTable"></div></div>
+    <footer class="overview-footer"><button class="btn overview-arrow" id="overviewPrev" type="button" aria-label="Попередні три дні"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><div class="overview-date-wrap" id="overviewDateWrap"><button class="btn overview-date-button" id="overviewDateBtn" type="button" aria-haspopup="true" aria-expanded="false"></button><div class="pop overview-date-pop" id="overviewDatePop" hidden></div></div><button class="btn overview-arrow" id="overviewNext" type="button" aria-label="Наступні три дні"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></footer>
+  </section>
+</div>
 
 <!-- people -->
 <div class="ov" id="ov" hidden>
@@ -143,6 +162,10 @@
       <input class="search" id="q" type="search" placeholder="Пошук за прізвищем" autocomplete="off">
     </div>
     <p class="hint">★ це ви: для вас рахуються зарплата й перепрацювання. Галочка додає колегу до календаря.</p>
+    <div class="people-selected-wrap" id="peopleSelectedWrap" hidden>
+      <span class="people-selected-label">Вибрані</span>
+      <div class="people-selected" id="peopleSelected" aria-label="Вибрані учасники"></div>
+    </div>
     <div class="mb" id="plist"></div>
     <div class="mf"><span id="mCount"></span><div style="display:flex;gap:8px"><button class="btn sm" id="mClear" type="button">Зняти всіх</button><button class="btn primary sm" data-close="ov" type="button">Готово</button></div></div>
   </div>
@@ -160,17 +183,15 @@
 <div class="ov" id="ov3" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt3">
     <div class="mh"><h3 id="mt3">Файли графіків <button class="btn ghost sm" data-close="ov3" type="button" aria-label="Закрити">✕</button></h3></div>
-    <p class="hint">Додавати Excel-файли може лише адміністратор. Доданий графік буде видимий усім користувачам.</p>
-    <div class="mb" id="flist"></div>
-    <div class="mf" id="fileActions" hidden><span>Додати локальний файл Excel</span><button class="btn primary sm" id="fAdd" type="button" hidden>+ Додати Excel</button></div>
     <section class="source-manager" id="sourceManager" hidden>
       <b>Автооновлення з Google Таблиць</b>
       <p class="hint">Вставте посилання на таблицю. Дані синхронізуються автоматично, а користувачі побачать їх під час відкриття сайту.</p>
-      <div class="source-entry"><input class="search" id="sourceUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…"><button class="btn primary sm" id="sourceAdd" type="button">Додати посилання</button></div>
+      <div class="source-entry"><input class="search" id="sourceUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…"><button class="btn primary sm" id="sourceAdd" type="button">Додати посилання</button><button class="btn source-icon-btn" id="sourceRefresh" type="button" hidden aria-label="Оновити зараз" title="Оновити зараз"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.8-2L20 12M4 12l2.6 5a7 7 0 0 0 11.8-2"/></svg></button><button class="btn source-icon-btn danger" id="sourceDelete" type="button" hidden aria-label="Видалити посилання" title="Видалити посилання"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg></button></div>
       <div id="sourceStatus" class="source-status"></div>
-      <div class="source-actions"><button class="btn sm" id="sourceRefresh" type="button" hidden>Оновити зараз</button><button class="btn ghost sm danger" id="sourceDelete" type="button" hidden>Видалити посилання</button></div>
       <small class="hint">Для автоматичної синхронізації один раз налаштуйте Apps Script за інструкцією в папці apps-script.</small>
     </section>
+    <div class="mb" id="flist"></div>
+    <div class="mf file-manual-add" id="fileActions" hidden><span>Додати файл вручну</span><button class="btn primary sm" id="fAdd" type="button" hidden>+ Додати Excel</button></div>
   </div>
 </div><div class="ov gate" id="gate">
   <div class="modal gatebox">
@@ -186,7 +207,6 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt5">
     <div class="mh"><h3 id="mt5">Адмін-панель <button class="btn ghost sm" id="admClose" type="button" aria-label="Закрити">✕</button></h3></div>
     <p class="hint">Керуйте доступом користувачів. Головні адміністратори можуть надавати права адміністратора та дозволяти окремі адреси з інших доменів.</p>
-    <button class="btn sm" id="exceptionToggle" type="button" hidden>Керувати винятками для пошти</button>
     <section class="admin-access-tools" id="adminAccessTools" hidden>
       <b>Винятки для пошти з інших доменів</b>
       <div class="admin-access-entry"><input class="search" id="exceptionEmail" type="email" placeholder="name@example.com"><button class="btn primary sm" id="exceptionAdd" type="button">Додати виняток</button></div>
@@ -194,24 +214,26 @@
       <div id="exceptionRows"></div>
     </section>
     <div class="mb" id="admList"></div>
+    <button class="btn sm admin-exception-toggle" id="exceptionToggle" type="button" hidden>Керувати винятками для пошти</button>
   </div>
 </div>
 
-<nav class="mnav" id="mNav" aria-label="Розділи"><button type="button" data-tab="cal" class="on" aria-label="Календар"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Календар</span></button><button type="button" data-tab="today" aria-label="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg><span>Сьогодні</span></button><button type="button" data-tab="chats" aria-label="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg><span>Закрито чатів</span></button><button type="button" data-tab="ot" aria-label="Переробка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg><span>Переробка</span></button><button type="button" data-tab="pay" aria-label="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg><span>Зарплата</span></button><button type="button" data-tab="ft" id="mFtTab" hidden aria-label="Вільний час"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 5.5 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 5.5-4.5 9s4.5 4 4.5 9"/></svg><span>Вільний час</span></button></nav>
+<nav class="mnav" id="mNav" aria-label="Розділи"><button type="button" data-tab="cal" class="on" aria-label="Календар"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Календар</span></button><button type="button" data-tab="today" aria-label="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg><span>Сьогодні</span></button><button type="button" data-tab="chats" aria-label="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg><span>Закрито чатів</span></button><button type="button" data-tab="ot" aria-label="Переробка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg><span>Переробка</span></button><button type="button" data-tab="pay" aria-label="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg><span>Зарплата</span></button><button type="button" data-tab="ft" id="mFtTab" hidden aria-label="Вільний час"><svg class="ft-lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3M12 14v3"/></svg><svg class="ft-access" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 5.5 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 5.5-4.5 9s4.5 4 4.5 9"/></svg><span>Вільний час</span></button></nav>
 <button class="mfab" id="mFab" type="button" aria-label="Додати людей для відстеження"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.4-3.4 2.9-5.4 6.2-5.4s5.8 2 6.2 5.4M18.5 7.5v6M15.5 10.5h6"/></svg></button>
 <div class="ov" id="ovS" hidden>
   <div class="modal sheet" role="dialog" aria-modal="true" aria-labelledby="mtS">
     <div class="mh"><h3 id="mtS">Налаштування <button class="btn ghost sm" id="sClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="sMail"></div></div>
     <div class="sbody">
-      <button class="srow" type="button" data-s="theme"><span>Тема</span><b id="sThemeV"></b></button>
-      <button class="srow" type="button" data-s="cur"><span>Валюта</span><b id="sCurV"></b></button>
+      <button class="srow" type="button" id="themeOpen"><span>Теми оформлення</span><span aria-hidden="true">›</span></button>
       <button class="srow" type="button" data-s="colors"><span>Кольори змін</span></button>
+      <button class="srow" type="button" id="settingsContact"><span>Контакти адміністратора</span></button>
       <button class="srow" type="button" data-s="data" id="sData"><span>Імпорт / Експорт</span></button>
       <button class="srow" type="button" data-s="adm" id="sAdm" hidden><span>Адмін-панель</span></button>
       <button class="srow danger" type="button" data-s="out" id="sOut" hidden><span>Вийти</span></button>
     </div>
   </div>
 </div>
+<div class="theme-options-overlay" id="themeOverlay" hidden><section class="theme-options-dialog" role="dialog" aria-modal="true" aria-labelledby="themeDialogTitle"><header><b id="themeDialogTitle">Теми оформлення</b><button class="btn ghost sm" id="themeClose" type="button" aria-label="Закрити">✕</button></header><div id="themeOptions" class="theme-options"></div></section></div>
 <div class="zbk" id="zbk" hidden></div>
 <div class="chartp" id="chartP" hidden>
   <div class="chp-h"><b>Чати по днях</b><span class="sub2" id="chMonth"></span></div>
@@ -231,7 +253,6 @@
     </div>
   </div>
 </div>
-<div class="ov" id="ov9" hidden><div class="modal"><div class="mh"><h3 id="editTitle">Час завершення</h3></div><div class="gbody"><label>Доступний варіант завершення <span class="fld"><select id="editShift"></select></span></label><div class="mf"><button class="btn" data-close="ov9" type="button">Скасувати</button><button class="btn primary" id="editSave" type="button">Зберегти</button></div></div></div></div>
 <div class="ov" id="ov6" hidden>
   <div class="modal ftmodal" role="dialog" aria-modal="true" aria-labelledby="mt6">
     <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
@@ -246,7 +267,7 @@
 <div class="ov" id="ov4" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt4">
     <div class="mh"><h3 id="mt4">Налаштування <button class="btn ghost sm" data-close="ov4" type="button" aria-label="Закрити">✕</button></h3></div>
-    <div class="setrow"><label for="curSel">Валюта</label><span class="fld"><select id="curSel"></select></span></div>
+    <div class="theme-picker theme-picker-modal"><b>Тема оформлення</b><div id="themeOptionsModal" class="theme-options"></div></div>
     <div class="mf"><span>Зберігається в базі даних</span><button class="btn primary sm" data-close="ov4" type="button">Готово</button></div>
   </div>
 </div>
@@ -257,4 +278,4 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 
-</body></html>
+<script>document.querySelectorAll("[data-contact-open]").forEach(b=>b.addEventListener("click",()=>document.getElementById("contactOverlay").hidden=false));document.querySelectorAll("[data-copy-email]").forEach(b=>b.addEventListener("click",async()=>{await navigator.clipboard.writeText("solonetskyi.r@novaposhta.ua");b.textContent="✓";setTimeout(()=>b.textContent="⧉",1300)}));document.querySelectorAll("[data-contact-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("contactOverlay").hidden=true));document.getElementById("contactOverlay").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.hidden=true});document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("contactOverlay").hidden=true})</script></body></html>

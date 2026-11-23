@@ -9,10 +9,11 @@ function parseCell(c){
   const type=typeof d==='string'?d.trim():'';
   if(isTimeV(a)){return {k:'work',s:fmtT(a),l:isTimeV(b)?fmtT(b):'',b:isTimeV(p)?fmtT(p):'',t:type}}
   if(typeof a==='string'&&RANGE.test(a.trim())){const m=a.trim().match(RANGE);return {k:'work',s:m[1].padStart(2,'0')+':'+m[2],r:a.trim().replace(/\s*[-–]\s*/,' – '),t:type}}
-  let txt='';for(const v of c){if(typeof v==='string'&&v.trim()&&v.trim()!=='-'){txt=v.trim();break}}
-  if(!txt)return null;
-  if(/відпуст/i.test(txt))return {k:'vac',x:'Відпустка'};
-  if(/лікарн/i.test(txt))return {k:'sick',x:'Лікарняний'};
+  const texts=c.filter(v=>typeof v==='string'&&v.trim()&&v.trim()!=='-').map(v=>v.trim());
+  if(!texts.length)return null;
+  if(texts.some(v=>/відпуст/i.test(v)))return {k:'vac',x:'Відпустка'};
+  if(texts.some(v=>/лікарн/i.test(v)))return {k:'sick',x:'Лікарняний'};
+  const txt=texts[0];
   if(/^вих/i.test(txt))return {k:'off',x:'Вих'};
   return {k:'other',x:txt};
 }
@@ -30,7 +31,7 @@ function parseGrid(rows){
     if(!name)continue;
     if(/^(різниця|кількість)/i.test(name))break;
     if(/^керівники груп/i.test(name)){group='Керівники груп';isLeader=true;continue}
-    if(/^група/i.test(name)){group=name.replace(/\s*\(.*$/,'');isLeader=false;continue}
+    if(/^група/i.test(name)){group=name.trim();isLeader=false;continue}
     if(typeof row[0]!=='number'&&typeof row[1]!=='number')continue;
     const sh={};
     cols.forEach((c,i)=>{const cell=parseCell([row[c],row[c+1],row[c+2],row[c+3]]);if(cell)sh[dates[i]]=cell});
@@ -165,7 +166,7 @@ const ivMin=iv=>{const a=parseT(iv.a),b=parseT(iv.b);if(a==null||b==null||a===b)
 const otHours=e=>Math.round(e.iv.reduce((s,iv)=>s+ivMin(iv),0)/60*100)/100;
 const parseX=v=>{const n=parseFloat(String(v).replace(',','.').replace(/[^\d.]/g,''));return isFinite(n)&&n>0?n:1};
 const otMoney=e=>otHours(e)*rate()*parseX(e.x);
-const otDates=()=>Object.keys(S.ot).filter(d=>d.startsWith(S.view+'-')).sort();
+const otDates=()=>Object.keys(S.ot).filter(d=>d.startsWith(S.view+'-')).sort((a,b)=>b.localeCompare(a));
 
 /* salary */
 function calcPay(){
@@ -239,44 +240,96 @@ function refreshChats(){
 }
 
 /* calendar */
+function calendarNameHTML(id){
+  const main=id===S.main, surname=String(id).trim().split(/\s+/)[0]||String(id);
+  return `<span class="n"><span class="n-desktop">${main?'★ ':''}${esc(short(id))}</span><span class="n-mobile">${main?'★':esc(surname.slice(0,3))}</span></span>`;
+}
 function entryHTML(id,d,multi){
   const mc=id===S.main?' mainu':'';
   const p=personAt(id,d),c=p?p.sh[d]:null;
   const col=c?colorFor(shiftKey(c)):'var(--muted)';
-  if(!c)return multi?`<div class="ent m none${mc}"><span class="t">—</span><span class="n">${id===S.main?'★ ':''}${esc(short(id))}</span></div>`:`<div class="ent one none"><div class="row"><span class="t" style="color:var(--muted)">—</span></div></div>`;
+  if(!c)return multi?`<div class="ent m none${mc}"><span class="t">—</span>${calendarNameHTML(id)}</div>`:`<div class="ent one none"><div class="row"><span class="t" style="color:var(--muted)">—</span></div></div>`;
   const tip=esc(id+(c.k==='work'?' · '+(c.r||c.s)+(c.l?' · обід '+c.l:'')+(c.b?' · перерва '+c.b:'')+(c.t?' · '+c.t:''):' · '+c.x));
   if(c.k==='work'){
     const time=c.r||c.s;const tg=c.t?`<span class="tag ${tagCls(c.t)}">${esc(c.t)}</span>`:'';
     const end=shiftEndTime(c,p),ms=end?`<span class="ms"><b>${esc(c.s)}</b><b>${esc(end)}</b></span>`:`<span class="ms"><b>${esc(c.s)}</b></span>`;
-    if(!multi)return `<div class="ent one wk${mc}" data-edit-shift="${esc(id)}" data-edit-date="${d}" style="--c:${col};cursor:pointer" title="${tip} · натисніть, щоб редагувати"><div class="row"><span class="t">${esc(time)}</span>${tg}</div>${c.l?`<div class="sub">обід ${c.l}${c.b?' · перерва '+c.b:''}</div>`:''}${ms}</div>`;
-    return `<div class="ent m${mc}" style="--c:${col}" title="${tip}"><span class="t">${esc(c.s)}</span>${tg}<span class="n">${id===S.main?'★ ':''}${esc(short(id))}</span></div>`;
+    if(!multi)return `<div class="ent one wk${mc}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">${esc(time)}</span>${tg}</div>${c.l?`<div class="sub">обід ${c.l}${c.b?' · перерва '+c.b:''}</div>`:''}${ms}</div>`;
+    return `<div class="ent m${mc}" style="--c:${col}" title="${tip}"><span class="t">${esc(c.s)}</span>${tg}${calendarNameHTML(id)}</div>`;
   }
+  if(c.k==='vac')return `<div class="ent m off${mc}" style="--c:${col}" title="${tip}"><span class="t">Відп</span>${calendarNameHTML(id)}</div>`;
+  if(c.k==='sick')return `<div class="ent m sick${mc}" style="--c:${col}" title="${tip}"><span class="t">Лік</span>${calendarNameHTML(id)}</div>`;
   const cls=c.k==='off'?'off':'';
   const chip=c.k==='off'?'':`<span class="tag ${c.k}">${esc(c.x.length>14?c.x.slice(0,13)+'…':c.x)}</span>`;
   if(!multi)return `<div class="ent one ${cls}${mc}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">${c.k==='off'?'Вихідний':''}</span>${chip}</div></div>`;
-  return `<div class="ent m ${cls}${mc}" style="--c:${col}" title="${tip}"><span class="t">${c.k==='off'?'Вих':''}</span>${chip}<span class="n">${id===S.main?'★ ':''}${esc(short(id))}</span></div>`;
+  return `<div class="ent m ${cls}${mc}" style="--c:${col}" title="${tip}"><span class="t">${c.k==='off'?'Вих':''}</span>${chip}${calendarNameHTML(id)}</div>`;
 }
 function renderCal(){
   const ymv=S.view,first=ymv+'-01',last=ymv+'-'+pad(daysIn(ymv));
   const start=addDays(first,-((dowOf(first)+6)%7)),end=addDays(last,(7-dowOf(last))%7);
   const ids=shown(),multi=ids.length>1,st=CH(),td=todayStr(),keys=new Set();
+  if(!ids.length){$('grid').classList.add('no-selection');$('grid').innerHTML='<div class="calendar-empty-state"><div class="empty-copy"><strong>Нікого не обрано.</strong><div class="empty-tip"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.4-3.4 2.9-5.4 6.2-5.4s5.8 2 6.2 5.4M18.5 7.5v6M15.5 10.5h6"/></svg><span class="empty-desktop">Натисніть «+ Люди» у верхньому лівому куті.</span><span class="empty-mobile">Натисніть кнопку додавання людей унизу праворуч.</span></div></div></div>';renderLegend(keys);return}
+  $('grid').classList.remove('no-selection');
   let h='',i=0;
   for(let d=start;d<=end;d=addDays(d,1),i++){
     const dow=dowOf(d),we=dow===0||dow===6,out=d.slice(0,7)!==ymv,day=+d.slice(8);
     const n=chTotal(st[d]);
     const hasFile=!!fileOf(d.slice(0,7));
     let body='';
-    if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi)});
-    const ot=S.ot[d];if(S.main&&ot&&otHours(ot)>0)body+=`<div class="otl" title="Переробка">Переробка +${fmtH(otHours(ot))} ×${parseX(ot.x)}</div>`;
+    const ot=S.ot[d],otHTML=S.main&&ot&&otHours(ot)>0?`<div class="otl" title="Переробка"><span class="otl-label">Переробка </span><span>${fmtH(otHours(ot))}</span><span>×${parseX(ot.x)}</span></div>`:'';let otPlaced=false;
+    if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi);if(id===S.main){body+=otHTML;otPlaced=true}});
+    if(!otPlaced)body+=otHTML;
     const mo=out&&(day===1||i===0)?`<span class="mo">${MON3[+d.slice(5,7)-1]}</span>`:'';
     h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${payBadge(d)}${n?(()=>{const lv=chLevel(d,n),ic=lv.cls==='g'?'M2.5 8.5 6 12l7.5-8':lv.cls==='y'?'M3 8h10':'M3.5 3.5l9 9M12.5 3.5l-9 9';return `<span class="cc ${lv.cls||'r'}" title="Закрито чатів: ${n} · норма за день: ${fmtN(lv.norm)}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg></span>`})():''}</div><div class="cb">${body}</div></div>`;
   }
-  $('grid').innerHTML=h;$('grid').dataset.n=ids.length;
+  $('grid').innerHTML=h;$('grid').dataset.n=ids.length;$('grid').dataset.weeks=Math.ceil((end-start+1)/7);
   renderLegend(keys);
 }
 function renderLegend(keys){
   const arr=[...keys].sort((a,b)=>{const sa=a[0]==='s',sb=b[0]==='s';return sa&&sb?(a<b?-1:1):sa?-1:sb?1:(a<b?-1:1)});
   $('legend').innerHTML=(arr.length?'<span class="lglbl">Зміни</span>':'')+arr.map(k=>`<button class="lg" type="button" data-lg style="--c:${colorFor(k)}"><i></i>${esc(keyLabel(k))}</button>`).join('')+'<button class="btn ghost sm" type="button" data-lg>Налаштувати кольори</button>';
+}
+function overviewDayCell(person,date){
+  const c=personAt(person.id,date)?.sh[date];
+  if(!c)return '<td class="overview-empty" colspan="4">—</td>';
+  if(c.k!=='work')return `<td class="overview-status ${esc(c.k)}" colspan="4">${esc(c.x||'—')}</td>`;
+  const bg=`color-mix(in srgb,${colorFor(shiftKey(c))} 17%,var(--surface))`;
+  return `<td class="overview-time" style="--overview-shift:${colorFor(shiftKey(c))};background:${bg}">${esc(c.r||c.s||'—')}</td><td style="background:${bg}">${esc(c.l||'—')}</td><td style="background:${bg}">${esc(c.b||'—')}</td><td style="background:${bg}">${esc(c.t||'—')}</td>`;
+}
+let overviewCenter=todayStr();
+let overviewCalendarMonth=overviewCenter.slice(0,7);
+function overviewGroupInfo(value,leaders=[]){
+  const raw=value||'Без групи',m=raw.match(/^(.*?)\s*\(\s*керівник\s+([^)]*)\s*\)$/i),name=(m?m[1]:raw).trim();
+  const requested=(m?m[2]:'').toLocaleLowerCase('uk').split(/\s+/).filter(Boolean);
+  const groupNo=Number(name.match(/група\s*(\d+)/i)?.[1]||0);
+  const byOrder=groupNo>0&&groupNo<=7?leaders[groupNo-1]?.name:'';
+  const matched=requested.length?leaders.find(p=>requested.every(token=>p.name.toLocaleLowerCase('uk').split(/\s+/).includes(token)))?.name:'';
+  const fullName=byOrder||matched|| (m?m[2].trim():'');
+  return {name,leader:fullName,label:fullName?`${name} · керівник: ${fullName}`:name};
+}
+function renderOverview(){
+  const center=overviewCenter||todayStr(),mobileOverview=matchMedia('(max-width:760px)').matches,dates=mobileOverview?[center]:[addDays(center,-1),center,addDays(center,1)],people=peopleSource();
+  const leaders=people.filter(p=>p.isLeader||(p.group||'').toLocaleLowerCase('uk')==='керівники груп');
+  $('overviewDateBtn').textContent=new Date(center+'T12:00:00').toLocaleDateString('uk-UA',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  $('overviewRange').textContent=dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('uk-UA',{day:'numeric',month:'short'})).join(' · ');
+  const groups=[...new Set(people.map(p=>p.group||'Без групи'))],prevGroup=$('overviewGroup').value;
+  $('overviewGroup').innerHTML='<option value="">Усі групи</option>'+groups.map(g=>`<option value="${esc(g)}">${esc(overviewGroupInfo(g,leaders).label)}</option>`).join('');
+  if(groups.includes(prevGroup))$('overviewGroup').value=prevGroup;
+  const q=$('overviewSearch').value.trim().toLocaleLowerCase('uk'),group=$('overviewGroup').value;
+  const rows=people.filter(p=>!group||(p.group||'Без групи')===group),matches=rows.filter(p=>q&&p.name.toLocaleLowerCase('uk').includes(q));
+  const cols='<colgroup><col class="overview-col-name">'+dates.map(()=>'<col class="overview-col-start"><col class="overview-col-small"><col class="overview-col-small"><col class="overview-col-type">').join('')+'</colgroup>';
+  const dayTitle=d=>mobileOverview?'Сьогодні':`${['Попередній день','Сьогодні','Наступний день'][dates.indexOf(d)]} · ${new Date(d+'T12:00:00').toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit'})}`;
+  const head=`<table class="overview-table">${cols}<thead><tr><th class="overview-name" rowspan="2">Фахівець</th>${dates.map(d=>`<th colspan="4" class="overview-date${d===center?' is-today':''}">${dayTitle(d)}</th>`).join('')}</tr><tr>${dates.map(()=>'<th>Початок</th><th>Обід</th><th>Перерва</th><th>Тип</th>').join('')}</tr></thead><tbody>`;
+  const personRow=(p,n)=>{const hit=!!q&&p.name.toLocaleLowerCase('uk').includes(q),cls=[p.id===S.main?'overview-main':'',p.id!==S.main&&S.sel.includes(p.id)?'overview-tracked':'',hit?'overview-hit':q?'overview-dim':''].filter(Boolean).join(' ');return `<tr class="${cls}" data-overview-person="${esc(p.id)}"><th class="overview-name" title="${esc(p.group||'Без групи')}"><span class="overview-number">${n}</span><span>${esc(p.name)}</span></th>${dates.map(d=>overviewDayCell(p,d)).join('')}</tr>`};
+  let body='';
+  if(group){rows.forEach((p,i)=>{if(!i)body+=`<tr class="overview-group-row"><th colspan="13">${esc(overviewGroupInfo(group,leaders).label)}</th></tr>`;body+=personRow(p,i+1)})}
+  else{
+    const visibleLeaders=rows.filter(p=>leaders.includes(p));
+    const teams=new Map();rows.filter(p=>!visibleLeaders.includes(p)).forEach(p=>{const key=p.group||'Без групи';if(!teams.has(key))teams.set(key,[]);teams.get(key).push(p)});
+    if(visibleLeaders.length)body+=`<tr class="overview-group-row overview-leaders-heading"><th colspan="13">Керівники груп</th></tr>`+visibleLeaders.map((p,i)=>personRow(p,i+1)).join('');
+    teams.forEach((members,key)=>{const info=overviewGroupInfo(key,leaders);body+=`<tr class="overview-group-row"><th colspan="13">${esc(info.name)}${info.leader?' · керівник: '+esc(info.leader):''}</th></tr>`+members.map((p,i)=>personRow(p,i+1)).join('')});
+  }
+  $('overviewTable').innerHTML=people.length?head+(body||'<tr><td class="overview-message" colspan="13">У цій групі нікого не знайдено.</td></tr>')+'</tbody></table>':'<p class="overview-message">Немає завантажених людей для цього графіка.</p>';
+  if(q&&matches.length){const row=$('overviewTable').querySelector('.overview-hit');row?.classList.add('overview-first-hit');row?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}
 }
 function renderNote(){
   const f=fileOf(S.view),raw=!S.demo&&S.files[S.view];
@@ -303,12 +356,14 @@ function endOpts(iv){
   for(let k=1;k<=12;k++){const t=(m+k*60)%1440,s=pad(Math.floor(t/60))+':'+pad(t%60);o+=`<option value="${s}"${s===iv.b?' selected':''}>${s} · +${k} год</option>`}
   return o;
 }
+const otExpandedDays=new Set(),ftExpandedDays=new Set();
 function renderOT(){
   const ds=otDates();
   ds.forEach(d=>S.ot[d].iv.forEach(iv=>{const a=parseT(iv.a),b=parseT(iv.b);if(b!=null){const k=a==null?-1:((b-a+1440)%1440)/60;if(!(Number.isInteger(k)&&k>=1&&k<=12))iv.b=''}}));
   $('otList').innerHTML=ds.length?ds.map(d=>{const e=S.ot[d];
-    const ivs=e.iv.map((iv,i)=>`<span class="iv"><input type="time" id="ot-${d}-a${i}" data-a="${i}" value="${iv.a}" aria-label="Початок"><span>–</span><select id="ot-${d}-b${i}" data-b="${i}" aria-label="Кінець, кратно годині"${iv.a?'':' disabled'}>${endOpts(iv)}</select>${e.iv.length>1?`<button type="button" data-ivdel="${i}" aria-label="Прибрати інтервал">✕</button>`:''}</span>`).join('');
-    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-h>${fmtH(otHours(e))}</div><div class="otm" data-m>${money(otMoney(e))}</div></div><label class="otx">×<input type="text" inputmode="decimal" id="otx-${d}" data-x value="${esc(e.x)}" aria-label="Кратність тарифу"></label><button class="btn ghost sm otdel" type="button" data-otdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-ivadd>+ інтервал</button></div></div></div>`}).join(''):'<p class="empty-note">Перепрацювань за цей місяць ще немає.</p>';
+    const ivs=e.iv.map((iv,i)=>`<span class="iv"><input type="time" id="ot-${d}-a${i}" data-a="${i}" value="${iv.a}" aria-label="Початок"><span>–</span><select id="ot-${d}-b${i}" data-b="${i}" aria-label="Кінець, кратно годині"${iv.a?'':' disabled'}>${endOpts(iv)}</select><button type="button" data-ivdel="${i}" aria-label="Прибрати інтервал">✕</button></span>`).join('');
+    const collapsed=d<todayStr()&&!otExpandedDays.has(d);
+    return `<div class="otr ot-entry${collapsed?' ot-collapsed':''}" data-d="${d}" aria-expanded="${!collapsed}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-h>${fmtH(otHours(e))}</div><div class="otm" data-m>${money(otMoney(e))}</div></div><label class="otx">×<input type="text" inputmode="decimal" id="otx-${d}" data-x value="${esc(e.x)}" aria-label="Кратність тарифу"></label><button class="btn ghost sm otdel delete-icon" type="button" data-otdel aria-label="Видалити день" title="Видалити"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg></button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-ivadd>+ інтервал</button></div></div></div>`}).join(''):'<p class="empty-note">Перепрацювань за цей місяць ще немає.</p>';
   refreshOT();
 }
 function refreshOT(){
@@ -332,6 +387,10 @@ function renderPeople(){
   const q=$('q').value.trim().toLowerCase();const groups={};
   peopleSource().forEach(p=>{if(!q||p.name.toLowerCase().includes(q))(groups[p.group]=groups[p.group]||[]).push(p)});
   $('plist').innerHTML=Object.keys(groups).map(g=>`<div class="grp"><b>${esc(g)}</b><button class="btn ghost sm" type="button" data-grp="${esc(g)}">Додати групу</button></div>`+groups[g].map(p=>{const isMe=S.main===p.id;return `<div class="p"><button class="me${isMe?' on':''}" type="button" data-me="${esc(p.id)}" title="${isMe?'Це ви':'Зробити основним користувачем'}" aria-label="Це я: ${esc(p.name)}">★</button><label class="pl"><input type="checkbox" data-pid="${esc(p.id)}" ${isMe||S.sel.includes(p.id)?'checked':''} ${isMe?'disabled':''}><span class="nm">${esc(p.name)}</span><small>${[p.where,p.hours?p.hours+' год':''].filter(Boolean).join(' · ')}</small></label></div>`}).join('')).join('')||'<p class="empty-note" style="padding:16px">Нікого не знайдено.</p>';
+  const peopleById=new Map(peopleSource().map(p=>[p.id,p]));
+  const selected=shown().map(id=>peopleById.get(id)||{id,name:id});
+  $('peopleSelectedWrap').hidden=!selected.length;
+  $('peopleSelected').innerHTML=selected.map(p=>`<button class="people-selected-chip${p.id===S.main?' is-main':''}" type="button" data-selected-remove="${esc(p.id)}" aria-label="Прибрати ${esc(p.name)} з вибраних"><span>${p.id===S.main?'★ ':''}${esc(p.name)}</span><b aria-hidden="true">×</b></button>`).join('');
   $('mCount').textContent='Обрано: '+shown().length;
 }
 function renderColors(){
@@ -387,9 +446,9 @@ async function deleteScheduleSource(){
   scheduleSource=null;await loadSharedSchedules();renderScheduleSource();toast('Посилання та синхронізовані графіки видалено.');
 }
 function renderFiles(){
-  const ks=Object.keys(S.files).sort(),admin=!!(ME&&ME.role==='admin');
-  $('fileActions').hidden=!admin;$('fAdd').hidden=!admin;$('upBtn').hidden=!admin;
-  $('flist').innerHTML=S.demo||!ks.length?'<p class="empty-note" style="padding:16px">Ще немає графіків.</p>':ks.map(k=>{const f=S.files[k],shared=!!f.sharedVersion;return `<div class="fr${f.hidden?' off':''}"><div class="fi"><b>${monthName(k)}${shared?' · Спільний':''}</b><small title="${esc(f.name)}">${esc(f.name)} · ${f.data.people.length} людей · додано ${esc(f.loadedAt)}</small></div><button class="btn sm" type="button" data-fview="${k}">Відкрити</button>${admin?`<button class="btn sm" type="button" data-fhide="${k}">${f.hidden?'Показати':'Сховати'}</button><button class="btn ghost sm${armed===k?' danger':''}" type="button" data-fdel="${k}">${armed===k?'Точно видалити?':'×'}</button>`:''}</div>`}).join('');
+  const current=todayStr().slice(0,7),ks=Object.keys(S.files).sort((a,b)=>a===current?-1:b===current?1:b.localeCompare(a)),admin=!!(ME&&ME.role==='admin');
+  $('fileActions').hidden=!admin;$('fAdd').hidden=!admin;
+  $('flist').innerHTML=S.demo||!ks.length?'<p class="empty-note" style="padding:16px">Ще немає графіків.</p>':ks.map(k=>{const f=S.files[k],shared=!!f.sharedVersion,isCurrent=k===current;return `<div class="fr${f.hidden?' off':''}${isCurrent?' current-file':''}"><div class="fi"><b>${monthName(k)}${isCurrent?' · Поточний місяць':' · Архів'}${shared?' · Спільний':''}</b><small title="${esc(f.name)}">${esc(f.name)} · ${f.data.people.length} людей · додано ${esc(f.loadedAt)}</small></div><button class="btn sm" type="button" data-fview="${k}">Відкрити</button>${admin?`<button class="btn sm" type="button" data-fhide="${k}">${f.hidden?'Показати':'Сховати'}</button><button class="btn ghost sm${armed===k?' danger':''}" type="button" data-fdel="${k}">${armed===k?'Точно видалити?':'×'}</button>`:''}</div>`}).join('');
 }
 /* modals */
 const MODALS={ov:()=>{save();renderAll()},ov2:()=>save(),ov3:()=>{armed=''},ov4:()=>save()};
@@ -398,12 +457,32 @@ function openM(id){$(id).hidden=false}
 function closeM(id){$(id).hidden=true;(MODALS[id]||(()=>{}))()}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeM(b.dataset.close)));
 Object.keys(MODALS).forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id)closeM(id)}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){Object.keys(MODALS).forEach(id=>{if(!$(id).hidden)closeM(id)});$('otPop').hidden=true}});
+function closeOverview(){$('ovOverview').hidden=true;$('overviewDatePop').hidden=true;$('overviewDateBtn').setAttribute('aria-expanded','false')}
+function renderOverviewDatePop(){
+  const ym=overviewCalendarMonth,first=ym+'-01',lead=(dowOf(first)+6)%7,n=daysIn(ym);
+  let h=`<div class="overview-date-pophead"><button type="button" class="btn ghost sm overview-arrow" data-overview-month="-1" aria-label="Попередній місяць"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><b>${monthName(ym)}</b><button type="button" class="btn ghost sm overview-arrow" data-overview-month="1" aria-label="Наступний місяць"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></div><div class="mini">`+['Пн','Вт','Ср','Чт','Пт','Сб','Нд'].map(x=>`<span>${x}</span>`).join('')+'<i></i>'.repeat(lead);
+  for(let i=1;i<=n;i++){const d=ym+'-'+pad(i);h+=`<button type="button" data-overview-date="${d}" class="${d===overviewCenter?'has':''}">${i}</button>`}
+  $('overviewDatePop').innerHTML=h+'</div>';
+}
+function showOverview(){overviewCenter=todayStr();overviewCalendarMonth=overviewCenter.slice(0,7);$('overviewSearch').value='';$('overviewGroup').value='';$('overviewDatePop').hidden=true;$('overviewDateBtn').setAttribute('aria-expanded','false');renderOverview();$('ovOverview').hidden=false;$('overviewSearch').focus()}
+$('overviewOpen').addEventListener('click',showOverview);
+$('mOverview').addEventListener('click',showOverview);
+$('overviewClose').addEventListener('click',closeOverview);
+$('ovOverview').addEventListener('click',e=>{if(e.target===$('ovOverview'))closeOverview()});
+$('overviewSearch').addEventListener('input',renderOverview);
+$('overviewGroup').addEventListener('change',renderOverview);
+$('overviewDateBtn').addEventListener('click',()=>{const pop=$('overviewDatePop'),open=pop.hidden;overviewCalendarMonth=overviewCenter.slice(0,7);renderOverviewDatePop();pop.hidden=!open;$('overviewDateBtn').setAttribute('aria-expanded',String(open))});
+$('overviewDatePop').addEventListener('click',e=>{const m=e.target.closest('[data-overview-month]'),d=e.target.closest('[data-overview-date]');if(m){overviewCalendarMonth=shiftYm(overviewCalendarMonth,+m.dataset.overviewMonth);renderOverviewDatePop();return}if(d){overviewCenter=d.dataset.overviewDate;overviewCalendarMonth=overviewCenter.slice(0,7);renderOverview();$('overviewDatePop').hidden=true;$('overviewDateBtn').setAttribute('aria-expanded','false')}});
+$('overviewPrev').addEventListener('click',()=>{overviewCenter=addDays(overviewCenter,-3);overviewCalendarMonth=overviewCenter.slice(0,7);$('overviewDatePop').hidden=true;renderOverview()});
+$('overviewNext').addEventListener('click',()=>{overviewCenter=addDays(overviewCenter,3);overviewCalendarMonth=overviewCenter.slice(0,7);$('overviewDatePop').hidden=true;renderOverview()});
+document.addEventListener('click',e=>{if(!e.target.closest('#overviewDateWrap')){$('overviewDatePop').hidden=true;$('overviewDateBtn').setAttribute('aria-expanded','false')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){Object.keys(MODALS).forEach(id=>{if(!$(id).hidden)closeM(id)});closeOverview();$('otPop').hidden=true}});
 
 $('addBtn').onclick=()=>{$('q').value='';renderPeople();openM('ov');$('q').focus()};
 $('q').oninput=renderPeople;
 $('mClear').onclick=()=>{S.sel=[];S.main='';renderPeople()};
-$('plist').addEventListener('change',e=>{const id=e.target.dataset.pid;if(id==null)return;S.sel=e.target.checked?[...S.sel,id]:S.sel.filter(x=>x!==id);$('mCount').textContent='Обрано: '+shown().length});
+$('plist').addEventListener('change',e=>{const id=e.target.dataset.pid;if(id==null)return;S.sel=e.target.checked?[...S.sel,id]:S.sel.filter(x=>x!==id);renderPeople()});
+$('peopleSelected').addEventListener('click',e=>{const chip=e.target.closest('[data-selected-remove]');if(!chip)return;const id=chip.dataset.selectedRemove;if(S.main===id)S.main='';else S.sel=S.sel.filter(x=>x!==id);save();renderPeople();renderAll()});
 $('plist').addEventListener('click',e=>{
   const me=e.target.closest('[data-me]');if(me){const id=me.dataset.me;S.main=S.main===id?'':id;S.sel=S.sel.filter(x=>x!==id);renderPeople();return}
   const g=e.target.dataset.grp;if(!g)return;peopleSource().filter(p=>p.group===g).forEach(p=>{if(p.id!==S.main&&!S.sel.includes(p.id))S.sel.push(p.id)});renderPeople();
@@ -419,8 +498,6 @@ $('prevM').onclick=()=>go(shiftYm(S.view,-1));
 $('nextM').onclick=()=>go(shiftYm(S.view,1));
 $('todayBtn').onclick=()=>go(todayStr().slice(0,7));
 $('grid').addEventListener('click',e=>{const c=e.target.closest('[data-go]');if(c)go(c.dataset.go)});
-$('grid').addEventListener('click',e=>{const el=e.target.closest('[data-edit-shift]');if(!el||shown().length!==1)return;const id=el.dataset.editShift,d=el.dataset.editDate,p=personAt(id,d);if(!p||!p.sh[d]||p.sh[d].k!=='work')return;window.editingShift={id,d};$('editTitle').textContent=`Час завершення · ${d}`;const all=new Map();Object.values(S.files).forEach(f=>f.data.people.forEach(person=>Object.values(person.sh).forEach(c=>{if(c&&c.k==='work'){const key=JSON.stringify(c);all.set(key,c)}})));const current=p.sh[d],key=JSON.stringify(current);all.set(key,current);$('editShift').innerHTML=[...all.entries()].filter(([,c])=>c.s===current.s).map(([v,c])=>`<option value="${esc(v)}" ${v===key?'selected':''}>${esc(c.r||c.s)}${c.l?' · обід '+c.l:''}${c.b?' · перерва '+c.b:''}${c.t?' · '+c.t:''}</option>`).join('');openM('ov9')});
-$('editSave').onclick=()=>{const x=window.editingShift;if(!x)return;const p=personAt(x.id,x.d);if(!p)return;try{const next=JSON.parse($('editShift').value);if(next.s!==p.sh[x.d].s)return;p.sh[x.d]=next;if(!S.demo)saveFile(x.d.slice(0,7))}catch{return}save();renderAll();closeM('ov9');window.editingShift=null};
 $('note').addEventListener('click',e=>{
   if(e.target.closest('[data-addfile]')){if(ME&&ME.role==='admin')document.getElementById('fileInp').click();else toast('\u0414\u043e\u0434\u0430\u0432\u0430\u0442\u0438\u0020\u0433\u0440\u0430\u0444\u0456\u043a\u0438\u0020\u043c\u043e\u0436\u0443\u0442\u044c\u0020\u043b\u0438\u0448\u0435\u0020\u0430\u0434\u043c\u0456\u043d\u0456\u0441\u0442\u0440\u0430\u0442\u043e\u0440\u0438\u002e')};
   const s=e.target.closest('[data-show]');if(s){S.files[s.dataset.show].hidden=false;saveMeta();renderAll()}
@@ -436,11 +513,19 @@ $('colReset').onclick=()=>{S.colors={};renderColors();renderCal()};
 $('days').addEventListener('input',e=>{const f=e.target.dataset.f;if(!f)return;const date=e.target.closest('.d').dataset.date;setChat(date,f,e.target.value);refreshChats();renderCal();renderToday()});
 
 /* settings + rate + rank */
-$('curSel').innerHTML=Object.keys(CURS).map(k=>`<option value="${k}">${CURS[k][1]}</option>`).join('');
 $('rank').innerHTML=RANKS.map(r=>`<option value="${r.id}">${r.label} · ${r.pct}%</option>`).join('');
-$('curSel').onchange=e=>{S.cur=e.target.value;saveMeta();renderOT();renderSalary()};
 $('rate').addEventListener('input',e=>{S.rate=e.target.value===''?0:Math.max(0,parseFloat(e.target.value)||0);saveMeta();refreshOT();renderSalary()});
 $('rank').onchange=e=>{S.rank=e.target.value;saveMeta();renderSalary()};
+
+document.addEventListener('wheel',e=>{
+  const input=e.target.closest('input#rate,input#tdN,input#tdP,input[data-f],input[data-x]');
+  if(!input||document.activeElement!==input||Math.abs(e.deltaY)<1)return;
+  e.preventDefault();
+  const step=input.matches('[data-x]')?.25:1;
+  const current=parseFloat(String(input.value||'0').replace(',','.'))||0;
+  input.value=String(Math.max(0,+(current+(e.deltaY<0?step:-step)).toFixed(2)));
+  input.dispatchEvent(new Event('input',{bubbles:true}));
+},{passive:false});
 
 /* overtime events */
 $('otAdd').onclick=e=>{e.stopPropagation();renderPop();$('otPop').hidden=!$('otPop').hidden};
@@ -465,13 +550,14 @@ $('otList').addEventListener('click',e=>{
   const row=e.target.closest('.otr');if(!row)return;const d=row.dataset.d,ent=S.ot[d];
   if(e.target.closest('[data-otdel]')){delete S.ot[d];saveMeta();renderOT();renderCal();renderSalary();return}
   if(e.target.closest('[data-ivadd]')){ent.iv.push({a:'',b:''});saveMeta();renderOT();const i=ent.iv.length-1;$('ot-'+d+'-a'+i).focus();return}
-  const dl=e.target.closest('[data-ivdel]');if(dl){ent.iv.splice(+dl.dataset.ivdel,1);saveMeta();renderOT();renderCal();renderSalary()}
+  const dl=e.target.closest('[data-ivdel]');if(dl){ent.iv.splice(+dl.dataset.ivdel,1);saveMeta();renderOT();renderCal();renderSalary();return}
+  if(e.target.closest('input,select,button,label,a'))return;
+  if(d<todayStr()){const collapse=!row.classList.contains('ot-collapsed');row.classList.toggle('ot-collapsed',collapse);row.setAttribute('aria-expanded',String(!collapse));if(collapse)otExpandedDays.delete(d);else otExpandedDays.add(d)}
 });
 
 /* files */
 $('filesBtn').onclick=()=>{renderFiles();openM('ov3');if(ME&&ME.role==='admin')loadScheduleSource()};
 $('sourceAdd').onclick=saveScheduleSource;$('sourceRefresh').onclick=requestScheduleRefresh;$('sourceDelete').onclick=deleteScheduleSource;
-$('upBtn').onclick=()=>{if(ME&&ME.role==='admin')$('fileInp').click()};
 $('fAdd').onclick=()=>{if(ME&&ME.role==='admin')$('fileInp').click()};
 $('fileInp').onchange=e=>{if(ME&&ME.role==='admin')[...e.target.files].forEach(readFile);e.target.value=''};
 $('flist').addEventListener('click',async e=>{
@@ -524,7 +610,7 @@ function renderToday(){
   $('tdDate').textContent=WD[dowOf(d)]+' '+pad(+d.slice(8))+'.'+d.slice(5,7)+'.'+d.slice(0,4);
   $('tdWho').textContent=S.main?short(S.main):'';
   const data=fileOf(d.slice(0,7)),leaders=data?data.data.people.filter(x=>(x.isLeader||x.group==='Керівники груп')&&x.sh[d]&&x.sh[d].k==='work'):[];
-  $('tdLeaders').innerHTML=leaders.map(x=>{const start=x.sh[d].s||((String(x.sh[d].r||'').match(/^\d{1,2}:\d{2}/)||[])[0])||'—';return `<span class="leader-chip"><span>${esc(x.name)}</span><small>${esc(start)}</small></span>`}).join('');$('tdLeadersWrap').hidden=!leaders.length;
+  $('tdLeaders').innerHTML=leaders.map(x=>{const raw=x.sh[d].s||x.sh[d].r||'',start=(String(raw).match(/\d{1,2}:\d{2}/)||[])[0]||'—',mins=parseT(start),end=mins==null?'—':pad(Math.floor(((mins+540)%1440)/60))+':'+pad((mins+540)%60);return `<span class="leader-chip"><span>${esc(x.name)}</span><small>${esc(start)}–${esc(end)}</small></span>`}).join('');$('tdLeadersWrap').hidden=!leaders.length;
   $('tdInfo').innerHTML=!S.main?'<p class="empty-note">Оберіть основного користувача (★ у «Люди»), щоб побачити обід і перерву.</p>'
     :!c?'<p class="empty-note">Немає даних про зміну на сьогодні.</p>'
     :c.k!=='work'?`<p class="empty-note">${esc(c.x)}</p>`
@@ -553,10 +639,14 @@ let tt;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clear
 /* theme */
 const SUN='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg>';
 const MOON='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5 5.6 5.6 0 1 0 13.5 9.6Z"/></svg>';
+const THEMES=[['light','Світла',SUN],['light-warm','Світла тепла',SUN],['dark','Темна нічна',MOON],['dark-blue','Темна синя',MOON]];
 const effTheme=()=>document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
-function themeIcon(){$('themeBtn').innerHTML=effTheme()==='dark'?SUN:MOON}
-function initTheme(){try{const t=localStorage.getItem('shifts.theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}themeIcon()}
-$('themeBtn').onclick=()=>{const n=effTheme()==='dark'?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('shifts.theme',n)}catch(e){}themeIcon()};
+function setTheme(t){if(!THEMES.some(x=>x[0]===t))t='light';document.documentElement.dataset.theme=t;try{localStorage.setItem('shifts.theme',t)}catch(e){}themeIcon();renderThemeOptions('themeMenu');renderThemeOptions();if($('themeOptionsModal'))renderThemeOptions('themeOptionsModal')}
+function themeIcon(){$('themeBtn').innerHTML=effTheme().startsWith('dark')?SUN:MOON}
+function renderThemeOptions(id='themeOptions'){const root=$(id);if(!root)return;const current=effTheme();root.innerHTML=THEMES.map(([key,label,icon])=>`<button class="theme-option${current===key?' active':''}" type="button" data-theme-choice="${key}">${icon}<span>${label}</span></button>`).join('');root.querySelectorAll('[data-theme-choice]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeChoice);if(id==='themeMenu'){$('themeMenu').hidden=true;$('themeBtn').setAttribute('aria-expanded','false')}})}
+function initTheme(){try{const t=localStorage.getItem('shifts.theme');if(THEMES.some(x=>x[0]===t))document.documentElement.dataset.theme=t}catch(e){}themeIcon();renderThemeOptions();renderThemeOptions('themeMenu')}
+$('themeBtn').onclick=()=>{const menu=$('themeMenu'),open=menu.hidden;renderThemeOptions('themeMenu');menu.hidden=!open;$('themeBtn').setAttribute('aria-expanded',String(open))};
+document.addEventListener('click',e=>{if(!e.target.closest('.theme-menu-wrap')){$('themeMenu').hidden=true;$('themeBtn').setAttribute('aria-expanded','false')}});
 
 initTheme();load();
 
@@ -593,11 +683,13 @@ async function loadSharedSchedules(){
 let sharedRefreshTimer=0;async function refreshSharedSchedules(){if(!ME)return;await loadSharedSchedules();if(!$('ov3').hidden){renderFiles();if(ME.role==='admin')await loadScheduleSource()}}
 function applyCloud(d){clearLocal();lsSet(LS,d.meta);Object.keys(d.files||{}).forEach(k=>lsSet(LF+k,d.files[k]));S=freshS();load();$('rate').value=S.rate!=null?S.rate:(S.demo?140:'');$('rank').value=S.rank;renderAll()}
 const gMsg=t=>$('gMsg').textContent=t;
+const setAppLoading=on=>{$('webLoading').hidden=!on;$('mobileLoading').hidden=!on;$('topLoadingActions').hidden=!on;$('topMailSlot').hidden=!on};
 async function initAuth(){
-  if(!CFG.SUPABASE_URL||!CFG.SUPABASE_ANON_KEY||!window.supabase){gMsg('Підключення до бази не налаштовано: заповніть config.js (див. README).');$('gStep1').hidden=true;return}
+  setAppLoading(true);
+  if(!CFG.SUPABASE_URL||!CFG.SUPABASE_ANON_KEY||!window.supabase){setAppLoading(false);gMsg('Підключення до бази не налаштовано: заповніть config.js (див. README).');$('gStep1').hidden=true;return}
   sb=supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
   let ses=null;try{ses=(await sb.auth.getSession()).data.session}catch(e){}
-  if(ses){enter(ses.user).catch(e=>{gMsg("Не вдалося підключитися: "+e.message);$('gStep1').hidden=false})}else{gMsg('Введіть пошту, ми надішлемо одноразовий код для входу.');$('gStep1').hidden=false}
+  if(ses){$('gate').hidden=true;enter(ses.user).catch(e=>{setAppLoading(false);$('gate').hidden=false;gMsg("Не вдалося підключитися: "+e.message);$('gStep1').hidden=false})}else{setAppLoading(false);gMsg('Введіть пошту, ми надішлемо одноразовий код для входу.');$('gStep1').hidden=false}
 }
 $('gSend').onclick=async()=>{const email=$('gEmail').value.trim().toLowerCase();if(!email)return;if(!sb)return;$('gSend').disabled=true;
   const{error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});$('gSend').disabled=false;
@@ -618,7 +710,7 @@ async function enter(user){
   const{data:st}=await sb.from('user_state').select('data').eq('user_id',user.id).maybeSingle();
   if(st&&st.data&&st.data.meta)applyCloud(st.data);
   READY=true;if(!(st&&st.data&&st.data.meta))cloudPush();
-  $('gate').hidden=true;$('meMail').textContent=ME.email;$('meMail').hidden=false;$('outBtn').hidden=false;
+  $('gate').hidden=true;setAppLoading(false);$('meMail').textContent=ME.email;$('meMail').hidden=false;$('outBtn').hidden=false;
   $('admBtn').hidden=ME.role!=='admin';$('dataBtn').hidden=false;$('ftOpen').hidden=!(ME.role==='admin'||ME.can_free_time);renderFiles();loadScheduleSource().catch(e=>toast('Не вдалося прочитати налаштування джерела: '+e.message));if(sharedRefreshTimer)clearInterval(sharedRefreshTimer);sharedRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshSharedSchedules()},60000);loadSharedSchedules().catch(e=>toast('Не вдалося оновити спільні графіки: '+e.message));if(location.hash==='#data')$('dataBtn').click();else if(location.hash==='#admin'&&ME.role==='admin')$('admBtn').click();
 }
 $('outBtn').onclick=async()=>{await sb.auth.signOut();clearLocal();localStorage.removeItem('shifts.owner');location.reload()};
@@ -651,7 +743,7 @@ async function renderAdm(){
     const remove=canDelete?`<button class="btn ghost sm danger" type="button" data-admin-action="delete" data-uid="${u.id}">Видалити профіль</button>`:'';
     return `<div class="admin-user-row"><span class="admin-user-label">${esc(email)} <small class="sub2">${badge}</small></span><div class="admin-user-actions">${freeTime}${roleAction}${remove}</div></div>`;
   };
-  const section=(title,items)=>`<section class="admin-section"><h4>${title}<span>${items.length}</span></h4>${items.length?items.map(row).join(''):'<p class="empty-note" style="padding:8px 12px">Немає користувачів у цьому розділі.</p>'}</section>`;
+  const section=(title,items)=>`<section class="admin-section"><h4>${title}<span>${items.length}</span></h4>${items.map(row).join('')}</section>`;
   $('admList').innerHTML=warning+section('Головні адміністратори',mainUsers)+section('Адміністратори',admins)+section('Звичайні користувачі',regularUsers);
 }
 $('admBtn').onclick=()=>{$('ov5').hidden=false;renderAdm()};
@@ -672,13 +764,14 @@ const fdm=(ym,o)=>WD[dowOf(ym+'-'+pad(o.day))]+' '+pad(o.day)+'.'+ym.slice(5)+(y
 /* free time */
 const fmtMin=m=>m>=60?Math.floor(m/60)+' год'+(m%60?' '+m%60+' хв':''):m+' хв';
 const ftMinutes=e=>{let t=+e.m||0;e.iv.forEach(i=>{const a=parseT(i.a),b=parseT(i.b);if(a!=null&&b!=null)t+=(b-a+1440)%1440});return t};
-const ftDays=()=>Object.keys(S.ft).filter(d=>d.startsWith(S.view)).sort();
+const ftDays=()=>Object.keys(S.ft).filter(d=>d.startsWith(S.view)).sort((a,b)=>b.localeCompare(a));
 function ftSummary(){const ds=ftDays(),t=ds.reduce((a,d)=>a+ftMinutes(S.ft[d]),0);$('ftSumM').textContent=fmtMin(t);$('ftAvg').textContent=ds.length?fmtMin(Math.round(t/ds.length)):'—';$('ftCnt').textContent=ds.length?'· '+ds.length+' дн.':''}
 function renderFt(){
   $('ftMonth').textContent=monthName(S.view);
   $('ftList').innerHTML=ftDays().map(d=>{const e=S.ft[d];
     const ivs=e.iv.map((i,k)=>`<span class="iv"><input type="time" data-fa="${k}" value="${i.a}" aria-label="Початок"><span>–</span><input type="time" data-fb="${k}" value="${i.b}" aria-label="Кінець"><button type="button" data-fid="${k}" aria-label="Прибрати інтервал">✕</button></span>`).join('');
-    return `<div class="otr" data-d="${d}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="otres"><div class="oth" data-t>${fmtMin(ftMinutes(e))}</div><div class="otm">вільний час</div></div><button class="btn ghost sm otdel" type="button" data-fdel aria-label="Видалити день">✕</button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-fadd>+ інтервал</button></div></div></div>`}).join('')||'<p class="empty-note">За цей місяць записів ще немає.</p>';
+    const collapsed=d<todayStr()&&!ftExpandedDays.has(d);
+    return `<div class="otr ft-entry${collapsed?' ft-collapsed':''}" data-d="${d}" aria-expanded="${!collapsed}"><div class="otd"><b>${+d.slice(8)}</b><small>${WD[dowOf(d)]}</small></div><div class="ft-collapsed-summary"><span>${fmtMin(ftMinutes(e))} вільного часу</span></div><div class="otres"><div class="oth" data-t>${fmtMin(ftMinutes(e))}</div><div class="otm">вільний час</div></div><button class="btn ghost sm otdel delete-icon" type="button" data-fdel aria-label="Видалити день" title="Видалити"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg></button><div class="otfoot"><div class="ivs">${ivs}<button class="btn ghost sm" type="button" data-fadd>+ інтервал</button></div></div></div>`}).join('')||'<p class="empty-note">За цей місяць записів ще немає.</p>';
   ftSummary();
 }
 $('ftList').addEventListener('input',e=>{const t=e.target,row=t.closest('.otr');if(!row)return;const en=S.ft[row.dataset.d];if(!en)return;
@@ -687,7 +780,9 @@ $('ftList').addEventListener('input',e=>{const t=e.target,row=t.closest('.otr');
 $('ftList').addEventListener('click',e=>{const row=e.target.closest('.otr');if(!row)return;const d=row.dataset.d,en=S.ft[d];if(!en)return;
   if(e.target.closest('[data-fdel]'))delete S.ft[d];
   else if(e.target.closest('[data-fadd]'))en.iv.push({a:'',b:''});
-  else{const b=e.target.closest('[data-fid]');if(!b)return;en.iv.splice(+b.dataset.fid,1)}
+  else if(e.target.closest('[data-fid]')){const b=e.target.closest('[data-fid]');en.iv.splice(+b.dataset.fid,1)}
+  else if(e.target.closest('input,select,button,label,a'))return;
+  else if(d<todayStr()){const collapse=!row.classList.contains('ft-collapsed');row.classList.toggle('ft-collapsed',collapse);row.setAttribute('aria-expanded',String(!collapse));if(collapse)ftExpandedDays.delete(d);else ftExpandedDays.add(d);return}
   saveMeta();renderFt()});
 function renderFtPop(){const first=S.view+'-01',lead=(dowOf(first)+6)%7,n=daysIn(S.view);
   let h=`<h4>${monthName(S.view)}</h4><div class="mini">`+['Пн','Вт','Ср','Чт','Пт','Сб','Нд'].map(x=>`<span>${x}</span>`).join('')+'<i></i>'.repeat(lead);
@@ -701,8 +796,9 @@ const ftClose=()=>{$('ov6').hidden=true;if(document.body.dataset.tab==='ft'){doc
 $('ftClose').onclick=ftClose;$('ov6').addEventListener('mousedown',e=>{if(e.target===$('ov6'))ftClose()});
 /* zoom a block to focus on it */
 let zoomEl=null;
-function zoomOff(){if(!zoomEl)return;zoomEl.classList.remove('zoom');zoomEl.querySelector('.zbtn').textContent='⤢';zoomEl=null;$('zbk').hidden=true;document.body.style.overflow='';syncChart()}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-zoom]');if(!b)return;const el=b.closest('.card');if(el===zoomEl){zoomOff();return}zoomOff();zoomEl=el;el.classList.add('zoom');b.textContent='✕';$('zbk').hidden=false;document.body.style.overflow='hidden';syncChart()});
+let zoomPlaceholder=null;
+function zoomOff(){if(!zoomEl)return;zoomEl.classList.remove('zoom');zoomEl.querySelector('.zbtn').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>';zoomPlaceholder?.remove();zoomPlaceholder=null;$('zoomPeople').hidden=true;zoomEl=null;$('zbk').hidden=true;document.body.style.overflow='';syncChart()}
+document.addEventListener('click',e=>{const add=e.target.closest('#zoomPeopleAdd');if(add){$('addBtn').click();return}const b=e.target.closest('[data-zoom]');if(!b)return;const el=b.closest('.card');if(el===zoomEl){zoomOff();return}zoomOff();const r=el.getBoundingClientRect();zoomPlaceholder=document.createElement('div');zoomPlaceholder.className='card zoom-placeholder';zoomPlaceholder.style.width=r.width+'px';zoomPlaceholder.style.height=r.height+'px';el.before(zoomPlaceholder);zoomEl=el;el.classList.add('zoom');if(el.classList.contains('cal')){$('zoomPeople').innerHTML='<b>Відстежую</b><span>'+$('chips').innerHTML+'</span><button class="btn sm" type="button" id="zoomPeopleAdd">+ Люди</button>';$('zoomPeople').hidden=false}b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8v8H8zM3 8V3h5m8 0h5v5M3 16v5h5m8 0h5v-5"/></svg>';$('zbk').hidden=false;document.body.style.overflow='hidden';syncChart()});
 $('zbk').onclick=zoomOff;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){zoomOff();ftClose()}});
 /* ===== */
@@ -796,6 +892,7 @@ renderAll();initAuth();
   }
   $('mNav').addEventListener('click',e=>{
     const b=e.target.closest('[data-tab]');if(!b)return;
+    if(b.dataset.tab==='ft'&&$('ftOpen').hidden){toast('Щоб отримати доступ до цієї функції, зверніться до адміністратора.');return}
     if(b.dataset.tab==='ft'){$('ov6').hidden=false;$('ftPop').hidden=true;renderFt();setTab('ft');return}
     $('ov6').hidden=true;
     setTab(b.dataset.tab);
@@ -810,7 +907,7 @@ renderAll();initAuth();
 
   /* free-time tab only with access */
   const ftb=$('ftOpen'),ftt=$('mFtTab');
-  const syncFt=()=>{ftt.hidden=ftb.hidden};
+  const syncFt=()=>{ftt.hidden=false;ftt.classList.toggle('ft-locked',ftb.hidden);ftt.setAttribute('aria-disabled',String(ftb.hidden));ftt.setAttribute('aria-label',ftb.hidden?'Вільний час недоступний — зверніться до адміністратора':'Вільний час')};
   new MutationObserver(syncFt).observe(ftb,{attributes:true,attributeFilter:['hidden']});syncFt();
 
   /* swipe the calendar up/down to change month */
@@ -835,17 +932,20 @@ renderAll();initAuth();
   function sheetOpen(){
     $('sMail').textContent=$('meMail').textContent||'';
     $('sAdm').hidden=$('admBtn').hidden;$('sData').hidden=$('dataBtn').hidden;$('sOut').hidden=$('outBtn').hidden;
-    $('sThemeV').textContent=effTheme()==='dark'?'Темна':'Світла';
-    $('sCurV').textContent=(CURS[S.cur]||CURS.UAH)[1];
+    renderThemeOptions();
     sh.hidden=false;
   }
   $('mSet').onclick=sheetOpen;
+  $('settingsContact').onclick=()=>{$('ovS').hidden=true;$('contactOverlay').hidden=false};
+  $('themeOpen').onclick=()=>{renderThemeOptions();$('themeOverlay').hidden=false};
+  $('themeClose').onclick=()=>$('themeOverlay').hidden=true;
+  $('themeOverlay').addEventListener('click',e=>{if(e.target===$('themeOverlay'))$('themeOverlay').hidden=true});
   $('sClose').onclick=()=>{sh.hidden=true};
   sh.addEventListener('click',e=>{
     if(e.target===sh){sh.hidden=true;return}
     const b=e.target.closest('[data-s]');if(!b)return;
     const a=b.dataset.s;
-    if(a==='theme'){$('themeBtn').click();$('sThemeV').textContent=effTheme()==='dark'?'Темна':'Світла';return}
+    if(a==='theme'){renderThemeOptions();return}
     sh.hidden=true;
     if(a==='cur')openM('ov4');
     else if(a==='colors'){renderColors();openM('ov2')}
