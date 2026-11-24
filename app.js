@@ -241,32 +241,35 @@ function refreshChats(){
 
 /* calendar */
 function calendarNameHTML(id){
-  const main=id===S.main, surname=String(id).trim().split(/\s+/)[0]||String(id);
-  return `<span class="n"><span class="n-desktop">${main?'★ ':''}${esc(short(id))}</span><span class="n-mobile">${main?'★':esc(surname.slice(0,3))}</span></span>`;
+  const main=id===S.main, parts=String(id).trim().split(/\s+/), initials=parts.slice(0,2).map(x=>Array.from(x)[0]?.toLocaleUpperCase('uk')||'').join('');
+  return `<span class="n"><span class="n-desktop">${main?'★ ':''}${esc(short(id))}</span><span class="n-mobile">${main?'★':esc(initials)}</span></span>`;
 }
-function entryHTML(id,d,multi){
+function entryHTML(id,d,multi,hasOvertime=false){
   const mc=id===S.main?' mainu':'';
+  const otc=!multi&&id===S.main&&hasOvertime?' with-ot':'';
   const p=personAt(id,d),c=p?p.sh[d]:null;
   const col=c?colorFor(shiftKey(c)):'var(--muted)';
+  const transparentColor=col==='transparent'?' transparent-color':'';
   if(!c)return multi?`<div class="ent m none${mc}"><span class="t">—</span>${calendarNameHTML(id)}</div>`:`<div class="ent one none"><div class="row"><span class="t" style="color:var(--muted)">—</span></div></div>`;
   const tip=esc(id+(c.k==='work'?' · '+(c.r||c.s)+(c.l?' · обід '+c.l:'')+(c.b?' · перерва '+c.b:'')+(c.t?' · '+c.t:''):' · '+c.x));
   if(c.k==='work'){
     const time=c.r||c.s;const tg=c.t?`<span class="tag ${tagCls(c.t)}">${esc(c.t)}</span>`:'';
     const end=shiftEndTime(c,p),ms=end?`<span class="ms"><b>${esc(c.s)}</b><b>${esc(end)}</b></span>`:`<span class="ms"><b>${esc(c.s)}</b></span>`;
     if(!multi)return `<div class="ent one wk${mc}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">${esc(time)}</span>${tg}</div>${c.l?`<div class="sub">обід ${c.l}${c.b?' · перерва '+c.b:''}</div>`:''}${ms}</div>`;
-    return `<div class="ent m${mc}" style="--c:${col}" title="${tip}"><span class="t">${esc(c.s)}</span>${tg}${calendarNameHTML(id)}</div>`;
+    return `<div class="ent m wk${mc}" style="--c:${col}" title="${tip}"><span class="t">${esc(c.s)}</span>${tg}${calendarNameHTML(id)}</div>`;
   }
-  if(c.k==='vac')return `<div class="ent m off${mc}" style="--c:${col}" title="${tip}"><span class="t">Відп</span>${calendarNameHTML(id)}</div>`;
-  if(c.k==='sick')return `<div class="ent m sick${mc}" style="--c:${col}" title="${tip}"><span class="t">Лік</span>${calendarNameHTML(id)}</div>`;
-  const cls=c.k==='off'?'off':'';
+  if(c.k==='vac'&&!multi)return `<div class="ent one off vac${otc}${transparentColor}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">Відпустка</span></div></div>`;
+  if(c.k==='vac')return `<div class="ent m off${mc}${otc}${transparentColor}" style="--c:${col}" title="${tip}"><span class="t">Відп</span>${calendarNameHTML(id)}</div>`;
+  if(c.k==='sick')return `<div class="ent m sick${mc}${otc}${transparentColor}" style="--c:${col}" title="${tip}"><span class="t">Лік</span>${calendarNameHTML(id)}</div>`;
+  const cls=(c.k==='off'?'off':'')+transparentColor;
   const chip=c.k==='off'?'':`<span class="tag ${c.k}">${esc(c.x.length>14?c.x.slice(0,13)+'…':c.x)}</span>`;
-  if(!multi)return `<div class="ent one ${cls}${mc}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">${c.k==='off'?'Вихідний':''}</span>${chip}</div></div>`;
+  if(!multi)return `<div class="ent one ${cls}${mc}${otc}" style="--c:${col}" title="${tip}"><div class="row"><span class="t">${c.k==='off'?'Вихідний':''}</span>${chip}</div></div>`;
   return `<div class="ent m ${cls}${mc}" style="--c:${col}" title="${tip}"><span class="t">${c.k==='off'?'Вих':''}</span>${chip}${calendarNameHTML(id)}</div>`;
 }
 function renderCal(){
   const ymv=S.view,first=ymv+'-01',last=ymv+'-'+pad(daysIn(ymv));
   const start=addDays(first,-((dowOf(first)+6)%7)),end=addDays(last,(7-dowOf(last))%7);
-  const ids=shown(),multi=ids.length>1,st=CH(),td=todayStr(),keys=new Set();
+  const ids=shown(),multi=ids.length>1,hideOvertime=multi,st=CH(),td=todayStr(),keys=new Set();
   if(!ids.length){$('grid').classList.add('no-selection');$('grid').innerHTML='<div class="calendar-empty-state"><div class="empty-copy"><strong>Нікого не обрано.</strong><div class="empty-tip"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c.4-3.4 2.9-5.4 6.2-5.4s5.8 2 6.2 5.4M18.5 7.5v6M15.5 10.5h6"/></svg><span class="empty-desktop">Натисніть «+ Люди» у верхньому лівому куті.</span><span class="empty-mobile">Натисніть кнопку додавання людей унизу праворуч.</span></div></div></div>';renderLegend(keys);return}
   $('grid').classList.remove('no-selection');
   let h='',i=0;
@@ -275,8 +278,8 @@ function renderCal(){
     const n=chTotal(st[d]);
     const hasFile=!!fileOf(d.slice(0,7));
     let body='';
-    const ot=S.ot[d],otHTML=S.main&&ot&&otHours(ot)>0?`<div class="otl" title="Переробка"><span class="otl-label">Переробка </span><span>${fmtH(otHours(ot))}</span><span>×${parseX(ot.x)}</span></div>`:'';let otPlaced=false;
-    if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi);if(id===S.main){body+=otHTML;otPlaced=true}});
+    const ot=S.ot[d],otHTML=!hideOvertime&&S.main&&ot&&otHours(ot)>0?`<div class="otl" title="Переробка"><span class="otl-label">Переробка </span><span>${fmtH(otHours(ot))}</span><span>×${parseX(ot.x)}</span></div>`:'';let otPlaced=false;
+    if(hasFile)ids.forEach(id=>{const p=personAt(id,d);if(p&&p.sh[d])keys.add(shiftKey(p.sh[d]));body+=entryHTML(id,d,multi,!!otHTML);if(id===S.main){body+=otHTML;otPlaced=true}});
     if(!otPlaced)body+=otHTML;
     const mo=out&&(day===1||i===0)?`<span class="mo">${MON3[+d.slice(5,7)-1]}</span>`:'';
     h+=`<div class="cell${we?' we':''}${out?' out':''}${d===td?' today':''}"${out?` data-go="${d.slice(0,7)}"`:''}><div class="ch"><span class="dn">${day}</span>${mo}<span class="wd">${WD[dow]}</span>${payBadge(d)}${n?(()=>{const lv=chLevel(d,n),ic=lv.cls==='g'?'M2.5 8.5 6 12l7.5-8':lv.cls==='y'?'M3 8h10':'M3.5 3.5l9 9M12.5 3.5l-9 9';return `<span class="cc ${lv.cls||'r'}" title="Закрито чатів: ${n} · норма за день: ${fmtN(lv.norm)}">${n}<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg></span>`})():''}</div><div class="cb">${body}</div></div>`;
@@ -393,10 +396,16 @@ function renderPeople(){
   $('peopleSelected').innerHTML=selected.map(p=>`<button class="people-selected-chip${p.id===S.main?' is-main':''}" type="button" data-selected-remove="${esc(p.id)}" aria-label="Прибрати ${esc(p.name)} з вибраних"><span>${p.id===S.main?'★ ':''}${esc(p.name)}</span><b aria-hidden="true">×</b></button>`).join('');
   $('mCount').textContent='Обрано: '+shown().length;
 }
+let selectedColorKey='',draftColor='',draftHue=220,draftSat=78,draftLight=55;
+function updateColorDraft(){draftColor=`hsl(${draftHue} ${draftSat}% ${draftLight}%)`;const plane=$('colorPlane');plane.style.setProperty('--hue',`hsl(${draftHue} 100% 50%)`);$('colorCursor').style.left=draftSat+'%';$('colorCursor').style.top=(100-draftLight)+'%';const a=(draftHue-90)*Math.PI/180;$('hueCursor').style.left=`${50+Math.cos(a)*43}%`;$('hueCursor').style.top=`${50+Math.sin(a)*43}%`;$('colorPreview').style.background=draftColor}
 function renderColors(){
-  const {keys,cnt}=allKeys();
-  $('clist').innerHTML=keys.map((k,i)=>`<div class="cr"><input type="color" id="col-${i}" data-ck="${k}" value="${colorFor(k)}" aria-label="Колір: ${esc(keyLabel(k))}"><span class="cl">${esc(keyLabel(k))}</span><span class="cn">${cnt[k]} в графіку</span><button class="btn ghost sm" type="button" data-reset="${k}">Скинути</button></div>`).join('');
+  const {keys}=allKeys();
+  $('clist').innerHTML=keys.map(k=>`<button class="cr${k===selectedColorKey?' active':''}" type="button" data-color-select="${esc(k)}"><i style="--swatch:${colorFor(k)}"></i><span class="cl">${esc(keyLabel(k))}</span></button>`).join('');
+  const selected=keys.includes(selectedColorKey);$('colorSelectedLabel').textContent=selected?keyLabel(selectedColorKey):'Оберіть зміну';
+  $('colorApply').disabled=!selected;$('colorCancel').disabled=!selected;$('colorCancel').style.visibility=selected?'visible':'hidden';$('colorCancel').setAttribute('aria-hidden',String(!selected));$('colorHue').value=draftHue;updateColorDraft();
 }
+function pointColor(e){const r=$('colorPlane').getBoundingClientRect();draftSat=Math.round(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*100);draftLight=Math.round((1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)))*100);updateColorDraft()}
+function pointHue(e){const r=$('colorHueWheel').getBoundingClientRect();draftHue=(Math.round(Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)*180/Math.PI+90)+360)%360;updateColorDraft()}
 let armed='';
 let scheduleSource=null;
 async function loadScheduleSource(){
@@ -411,7 +420,7 @@ function renderScheduleSource(){
   if(!admin)return;
   const has=!!(scheduleSource&&!scheduleSource.error);
   $('sourceUrl').value=has?scheduleSource.source_url:'';
-  $('sourceAdd').textContent=has?'Змінити посилання':'Додати посилання';
+  $('sourceAdd').textContent=has?'Змінити':'Додати посилання';
   $('sourceRefresh').hidden=!has;$('sourceDelete').hidden=!has;
   const st=$('sourceStatus');
   if(scheduleSource&&scheduleSource.error){st.textContent='Не вдалося прочитати налаштування джерела: '+scheduleSource.error+' (перевірте shared_schedule_files.sql у Supabase)';return}
@@ -448,7 +457,7 @@ async function deleteScheduleSource(){
 function renderFiles(){
   const current=todayStr().slice(0,7),ks=Object.keys(S.files).sort((a,b)=>a===current?-1:b===current?1:b.localeCompare(a)),admin=!!(ME&&ME.role==='admin');
   $('fileActions').hidden=!admin;$('fAdd').hidden=!admin;
-  $('flist').innerHTML=S.demo||!ks.length?'<p class="empty-note" style="padding:16px">Ще немає графіків.</p>':ks.map(k=>{const f=S.files[k],shared=!!f.sharedVersion,isCurrent=k===current;return `<div class="fr${f.hidden?' off':''}${isCurrent?' current-file':''}"><div class="fi"><b>${monthName(k)}${isCurrent?' · Поточний місяць':' · Архів'}${shared?' · Спільний':''}</b><small title="${esc(f.name)}">${esc(f.name)} · ${f.data.people.length} людей · додано ${esc(f.loadedAt)}</small></div><button class="btn sm" type="button" data-fview="${k}">Відкрити</button>${admin?`<button class="btn sm" type="button" data-fhide="${k}">${f.hidden?'Показати':'Сховати'}</button><button class="btn ghost sm${armed===k?' danger':''}" type="button" data-fdel="${k}">${armed===k?'Точно видалити?':'×'}</button>`:''}</div>`}).join('');
+  $('flist').innerHTML=S.demo||!ks.length?'<p class="empty-note" style="padding:16px">Ще немає графіків.</p>':ks.map(k=>{const f=S.files[k],shared=!!f.sharedVersion,isCurrent=k===current;return `<div class="fr${f.hidden?' off':''}${isCurrent?' current-file':''}"><div class="fi"><b>${monthName(k)}${isCurrent?' · Поточний місяць':' · Архів'}${shared?' · Спільний':''}</b><small title="${esc(f.name)}">${esc(f.name)} · ${f.data.people.length} людей · додано ${esc(f.loadedAt)}</small></div><button class="btn source-icon-btn" type="button" data-fview="${k}" aria-label="Відкрити графік" title="Відкрити"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h8M8 17h5"/></svg></button>${admin?`<button class="btn source-icon-btn" type="button" data-fhide="${k}" aria-label="${f.hidden?'Показати':'Сховати'} графік" title="${f.hidden?'Показати':'Сховати'}"><svg viewBox="0 0 24 24" aria-hidden="true">${f.hidden?'<path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.5"/>':'<path d="m3 3 18 18M10.6 6.2A9.8 9.8 0 0 1 12 6c5.8 0 9 6 9 6a14 14 0 0 1-3.1 3.6M6.2 6.8C4.1 8.1 3 12 3 12s3.2 6 9 6c1 0 1.9-.2 2.7-.5"/>'}</svg></button><button class="btn source-icon-btn danger${armed===k?' armed':''}" type="button" data-fdel="${k}" aria-label="${armed===k?'Підтвердити видалення':'Видалити'}" title="${armed===k?'Підтвердити видалення':'Видалити'}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg></button>`:''}</div>`}).join('');
 }
 /* modals */
 const MODALS={ov:()=>{save();renderAll()},ov2:()=>save(),ov3:()=>{armed=''},ov4:()=>save()};
@@ -505,8 +514,14 @@ $('note').addEventListener('click',e=>{
 $('legend').addEventListener('click',e=>{if(e.target.closest('[data-lg]')){renderColors();openM('ov2')}});
 
 /* colours */
-$('clist').addEventListener('input',e=>{const k=e.target.dataset.ck;if(!k)return;S.colors[k]=e.target.value;renderCal()});
-$('clist').addEventListener('click',e=>{const k=e.target.dataset.reset;if(!k)return;delete S.colors[k];renderColors();renderCal()});
+$('clist').addEventListener('click',e=>{const b=e.target.closest('[data-color-select]');if(!b)return;selectedColorKey=b.dataset.colorSelect;draftColor=colorFor(selectedColorKey);renderColors()});
+$('colorPlane').addEventListener('pointerdown',e=>{if(!selectedColorKey)return;e.preventDefault();$('colorPlane').setPointerCapture(e.pointerId);pointColor(e)});
+$('colorPlane').addEventListener('pointermove',e=>{if(e.buttons&&selectedColorKey)pointColor(e)});
+$('colorHueWheel').addEventListener('pointerdown',e=>{if(!selectedColorKey)return;e.preventDefault();$('colorHueWheel').setPointerCapture(e.pointerId);pointHue(e)});
+$('colorHueWheel').addEventListener('pointermove',e=>{if(e.buttons&&selectedColorKey)pointHue(e)});
+$('colorHue').addEventListener('input',e=>{draftHue=+e.target.value;updateColorDraft()});
+$('colorApply').onclick=()=>{if(!selectedColorKey)return;S.colors[selectedColorKey]=draftSat===0&&draftLight>=99?'transparent':draftColor;renderColors();renderCal();saveMeta()};
+$('colorCancel').onclick=()=>{selectedColorKey='';draftColor='';renderColors()};
 $('colReset').onclick=()=>{S.colors={};renderColors();renderCal()};
 
 /* chats inputs */
