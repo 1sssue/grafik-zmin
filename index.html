@@ -35,6 +35,9 @@
 
 <div class="mtop" id="mTop">
   <button class="mib mch" id="mPrev" type="button" aria-label="Попередній місяць"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+  <a class="mib m-stats" id="mStats" href="https://docs.google.com/spreadsheets/d/1k8kXDdox0ufiifZOjtpZYOsabY810xWjgCsps2H6NKE/edit?usp=sharing" target="_blank" rel="noopener noreferrer" aria-label="Відкрити актуальну статистику" title="Актуальна статистика"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg></a>
+  <button class="mib m-info" id="mOtInfo" type="button" aria-label="Інформація про доплату за перепрацювання" title="Інформація про доплату за перепрацювання"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
+  <button class="mib m-info" id="mPayInfo" type="button" aria-label="Пояснення розрахунку зарплати" title="Пояснення розрахунку зарплати"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
   <button class="mtitle" id="mTitle" type="button" aria-label="До поточного місяця"><span id="mTM">—</span><small id="mTY"></small></button>
   <button class="mib mch" id="mNext" type="button" aria-label="Наступний місяць"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
   <button class="mib" id="mFiles" type="button" aria-label="Файли"><svg viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M14 3.5V8h4.5M8.5 13h7M8.5 16.5h7"/></svg></button>
@@ -64,24 +67,24 @@
         <label><span>Відкладені</span><input type="number" min="0" inputmode="numeric" id="tdP" placeholder="0"></label>
       </div>
       <div class="tdres" id="tdRes"></div>
-      <div id="tdOt"></div>
       <button class="btn primary" id="tdSave" type="button" style="justify-content:center">Зберегти</button>
     </div></aside>
 
 
 
-    <aside class="card side" aria-label="Закриті чати"><div class="side-in">
+    <aside class="card side" id="chatsCard" aria-label="Закриті чати"><div class="side-in">
       <div class="sidehead">
-        <div><h2>Закрито чатів</h2><div class="big" style="margin-top:6px"><b id="sumN">0</b><span id="sumLbl">за місяць</span></div></div>
-        <div class="hbtns"><button class="btn sm" id="chartToggle" type="button">Сховати графік</button><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
+        <h2>Закрито чатів</h2>
+        <div class="hbtns"><a class="btn stats-link" href="https://docs.google.com/spreadsheets/d/1k8kXDdox0ufiifZOjtpZYOsabY810xWjgCsps2H6NKE/edit?usp=sharing" target="_blank" rel="noopener noreferrer" aria-label="Відкрити актуальну статистику" title="Актуальна статистика"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg></a><button class="btn sm" id="chartToggle" type="button">Показати графік</button><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
       </div>
+      <div class="monthly-total"><div class="big"><b id="sumN">0</b><span id="sumLbl">за місяць</span></div></div>
       <div class="stats">
         <div class="stat"><small>Середнє на день</small><b id="avgN">—</b></div>
         <div class="stat"><small>Середнє за годину</small><b id="avgH">—</b></div>
         <div class="stat"><small>Найкращий день</small><b id="bestN">—</b></div>
         <div class="stat" id="normBox"><small id="normL">До норми</small><b id="normN">—</b></div>
       </div>
-      <div class="dh"><span>Д</span><span></span><span>Загальна кількість</span><span>Відкладені</span></div>
+      <div class="dh"><span>День</span><span></span><span>Загальна кількість</span><span>Відкладені</span></div>
       <div class="days" id="days"></div>
     </div></aside>
     </div></div>
@@ -89,7 +92,7 @@
     <section class="card cal" aria-label="Календар змін">
       <div class="calhead">
         <button class="nav" id="prevM" type="button" aria-label="Попередній місяць"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button>
-        <h2 id="monthTitle">—</h2>
+        <div class="month-picker-wrap"><button class="month-picker" id="monthTitle" type="button" aria-label="Обрати місяць із завантажених графіків" aria-haspopup="true" aria-expanded="false"><span id="monthTitleLabel">—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="pop month-picker-pop" id="monthPickerPop" role="group" aria-label="Місяці за роками" hidden></div></div>
         <button class="nav" id="nextM" type="button" aria-label="Наступний місяць"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button>
         <button class="btn sm" id="todayBtn" type="button" style="margin-left:6px">Сьогодні</button>
         <button class="btn primary sm overview-open" id="overviewOpen" type="button">Огляд всіх змін</button>
@@ -119,10 +122,11 @@
     <section class="card blk" id="otCard" aria-label="Переробка">
       <div class="bh">
         <div><h2>Переробка</h2><div class="sub2" id="otMonth"></div></div>
-        <div class="hbtns"><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
+        <div class="hbtns"><button class="ot-rank-info" id="otRankInfoBtn" type="button" aria-label="Інформація про доплату за розряд" title="Інформація про доплату за розряд"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button><button class="btn sm zbtn" type="button" data-zoom aria-label="Розгорнути блок" title="Розгорнути"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button><div class="ot-rank-pop" id="otRankPopover" role="status" hidden></div></div>
       </div>
       <div class="ftop"><div class="otsum"><div><small>Годин</small><b id="otH">0</b></div><div><small>Сума</small><b id="otM">0</b></div></div><div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="otAdd" type="button">+ Додати день</button><div class="pop" id="otPop" hidden></div></div></div></div>
       <div class="otlist" id="otList"></div>
+      <div class="otcalc-wrap"><b class="otcalc-title">Розрахунок перепрацювання</b><div class="otcalc" aria-label="Калькулятор перепрацювання"><input id="otCalcAmount" type="number" min="0" step="any" inputmode="decimal" placeholder="Сума, грн" aria-label="Сума перепрацювання у гривнях"><span class="otcalc-times" aria-hidden="true">×</span><input id="otCalcRate" type="text" inputmode="decimal" data-x value="1.5" aria-label="Тариф інтенсивності"><input id="otCalcHours" type="number" min="0" step="any" inputmode="decimal" placeholder="Години" aria-label="Години перепрацювання"></div></div>
     </section>
 
 
@@ -130,14 +134,14 @@
       <div class="bh"><h2>Розрахунок зарплати</h2><span class="sub2" id="payWho"></span></div>
       <div class="inputs">
         <label>Ставка/год<span class="fld rate-field"><input id="rate" type="number" min="0" step="any" inputmode="decimal" placeholder="0"><i id="curLbl"></i></span></label>
-        <label>Розряд фахівця<span class="fld"><select id="rank"></select></span></label>
+        <label><span class="rank-label">Розряд фахівця<button class="rank-info-btn" id="rankInfoBtn" type="button" aria-label="Пояснення розрахунку зарплати" title="Пояснення розрахунку"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></span><span class="fld"><select id="rank"></select></span></label>
       </div>
       <label class="chk"><input type="checkbox" id="qbChk"> Вихожу на доплату по кількісному</label>
       <div id="payCalc"></div>
     </section>
     </div></div>
   </div>
-  <div class="ftbar"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3h3M6 8h4M6 10.5h4"/></svg>Шаблони</a><button class="btn contact-admin" type="button" data-contact-open aria-label="Контакти адміністратора"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 7 8-7"/></svg></button></div>
+  <div class="ftbar"><div class="module-shortcuts module-shortcuts-left" id="moduleShortcutsLeft" aria-label="Приховані розділи зліва"><button type="button" data-open-module="today" aria-label="Відкрити Сьогодні" title="Сьогодні"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M8.5 15l2.5 2.5 4.5-5"/></svg></button><button type="button" data-open-module="chats" aria-label="Відкрити Закрито чатів" title="Закрито чатів"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-4.5 3.5v-3.5H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M7.5 9.5h9M7.5 13h5"/></svg></button></div><div class="module-shortcuts module-shortcuts-right" id="moduleShortcutsRight" aria-label="Приховані розділи справа"><button type="button" data-open-module="ot" aria-label="Відкрити Переробка" title="Переробка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.5l3 2M9.5 2.5h5"/></svg></button><button type="button" data-open-module="pay" aria-label="Відкрити Зарплата" title="Зарплата"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.7"/><path d="M6 12h.01M18 12h.01"/></svg></button></div><div class="ftbar-center"><button class="btn" id="ftOpen" type="button" hidden>⏱ Вільний час</button><a class="btn" href="templates.html"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.8h5l3 3v9.4H4z"/><path d="M9 1.8v3h3M6 8h4M6 10.5h4"/></svg>Шаблони</a></div><button class="btn contact-admin" type="button" data-contact-open aria-label="Контакти адміністратора"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 7 8-7"/></svg></button></div>
 </main>
 <div class="contact-overlay" id="contactOverlay" hidden><section class="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contactTitle"><button class="contact-close" type="button" data-contact-close aria-label="Закрити">×</button><h2 id="contactTitle">Побажання щодо покращення сайту</h2><div class="contact-details"><b>Солонецький Роман</b><div class="contact-email"><span>solonetskyi.r@novaposhta.ua</span><button type="button" data-copy-email aria-label="Копіювати пошту" title="Копіювати">⧉</button></div></div></section></div>
 
@@ -150,7 +154,7 @@
       <div class="overview-filters"><input class="search" id="overviewSearch" type="search" placeholder="Знайти фахівця" autocomplete="off"><select class="search" id="overviewGroup" aria-label="Фільтр за групою"><option value="">Усі групи</option></select></div>
     </header>
     <div class="overview-scroll" id="overviewScroll"><div id="overviewTable"></div></div>
-    <footer class="overview-footer"><button class="btn overview-arrow" id="overviewPrev" type="button" aria-label="Попередні три дні"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><div class="overview-date-wrap" id="overviewDateWrap"><button class="btn overview-date-button" id="overviewDateBtn" type="button" aria-haspopup="true" aria-expanded="false"></button><div class="pop overview-date-pop" id="overviewDatePop" hidden></div></div><button class="btn overview-arrow" id="overviewNext" type="button" aria-label="Наступні три дні"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></footer>
+    <footer class="overview-footer"><button class="btn overview-arrow" id="overviewPrev" type="button" aria-label="Попередні дні"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button><div class="overview-date-wrap" id="overviewDateWrap"><button class="btn overview-date-button" id="overviewDateBtn" type="button" aria-haspopup="true" aria-expanded="false"></button><div class="pop overview-date-pop" id="overviewDatePop" hidden></div></div><button class="btn overview-arrow" id="overviewNext" type="button" aria-label="Наступні дні"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button></footer>
   </section>
 </div>
 
@@ -175,7 +179,7 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt2">
     <div class="mh"><h3 id="mt2">Кольори змін <button class="btn ghost sm" data-close="ov2" type="button" aria-label="Закрити">✕</button></h3></div>
     <p class="hint">Зміна визначається часом початку. Колір кожної налаштовується окремо, так само як для вихідних, відпустки та лікарняного.</p>
-    <div class="color-editor"><div class="mb" id="clist"></div><aside class="color-palette"><b id="colorSelectedLabel">Оберіть зміну</b><div class="hue-wheel" id="colorHueWheel" role="slider" tabindex="0" aria-label="Кругове поле вибору відтінку"><i id="hueCursor"></i></div><input class="hue-range" id="colorHue" type="range" min="0" max="360" value="220" aria-label="Відтінок"><div class="color-plane" id="colorPlane" role="slider" tabindex="0" aria-label="Насиченість і яскравість кольору"><i id="colorCursor"></i></div><div class="color-preview" id="colorPreview"></div><button class="btn primary sm" id="colorApply" type="button" disabled>Застосувати</button><button class="btn sm" id="colorCancel" type="button" aria-hidden="true" disabled>Скасувати</button></aside></div>
+    <div class="color-editor"><div class="color-list-panel"><div class="mb" id="clist"></div><div class="color-shift-preview" id="colorShiftPreview" hidden><small>Приклад у календарі</small><div class="color-sample-stage" id="colorCalendarSample"></div></div></div><aside class="color-palette"><b id="colorSelectedLabel">Оберіть зміну</b><div class="hue-wheel" id="colorHueWheel" role="slider" tabindex="0" aria-label="Кругове поле вибору відтінку"><i id="hueCursor"></i></div><input class="hue-range" id="colorHue" type="range" min="0" max="360" value="220" aria-label="Відтінок"><div class="color-plane" id="colorPlane" role="slider" tabindex="0" aria-label="Насиченість і яскравість кольору"><i id="colorCursor"></i></div><div class="color-preview" id="colorPreview"></div><button class="btn primary sm" id="colorApply" type="button" disabled>Застосувати</button><button class="btn sm" id="colorCancel" type="button" aria-hidden="true" disabled>Скасувати</button></aside></div>
     <div class="mf"><button class="btn sm" id="colReset" type="button">Скинути всі</button><button class="btn primary sm" data-close="ov2" type="button">Готово</button></div>
   </div>
 </div>
@@ -186,20 +190,20 @@
     <section class="source-manager" id="sourceManager" hidden>
       <b>Автооновлення з Google Таблиць</b>
       <p class="hint">Вставте посилання на таблицю. Дані синхронізуються автоматично, а користувачі побачать їх під час відкриття сайту.</p>
-      <div class="source-entry"><input class="search" id="sourceUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…"><button class="btn primary sm" id="sourceAdd" type="button">Додати посилання</button><button class="btn source-icon-btn" id="sourceRefresh" type="button" hidden aria-label="Оновити зараз" title="Оновити зараз"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.8-2L20 12M4 12l2.6 5a7 7 0 0 0 11.8-2"/></svg></button><button class="btn source-icon-btn danger" id="sourceDelete" type="button" hidden aria-label="Видалити посилання" title="Видалити посилання"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg></button></div>
+      <div class="source-entry"><button class="btn source-icon-btn" id="sourceOpen" type="button" aria-label="Відкрити посилання в новій вкладці" title="Відкрити в новій вкладці"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5h6v6M19 5l-9 9"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button><input class="search" id="sourceUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…"><button class="btn primary sm" id="sourceAdd" type="button">Додати посилання</button><button class="btn source-icon-btn" id="sourceRefresh" type="button" hidden aria-label="Оновити зараз" title="Оновити зараз"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.8-2L20 12M4 12l2.6 5a7 7 0 0 0 11.8-2"/></svg></button><button class="btn source-icon-btn danger" id="sourceDelete" type="button" hidden aria-label="Видалити посилання" title="Видалити посилання"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg></button></div>
       <div id="sourceStatus" class="source-status"></div>
       <small class="hint">Для автоматичної синхронізації один раз налаштуйте Apps Script за інструкцією в папці apps-script.</small>
     </section>
     <div class="mb" id="flist"></div>
     <div class="mf file-manual-add" id="fileActions" hidden><span>Додати файл вручну</span><button class="btn primary sm" id="fAdd" type="button" hidden>+ Додати Excel</button></div>
   </div>
-</div><div class="ov gate" id="gate">
+</div><div class="ov gate" id="gate" hidden>
   <div class="modal gatebox">
     <div class="mh"><h3>Графік змін</h3></div>
     <div class="gbody">
       <p class="hint" id="gMsg">Завантаження…</p>
       <div id="gStep1" class="gbody" hidden><input class="search" type="email" id="gEmail" placeholder="name@example.com" autocomplete="email"><small class="hint">Нові облікові записи: лише @novaposhta.ua. Інші адреси має попередньо дозволити головний адміністратор.</small><button class="btn primary" id="gSend" type="button" style="justify-content:center">Надіслати код</button></div>
-      <div id="gStep2" class="gbody" hidden><input class="search" id="gCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Код з листа"><button class="btn primary" id="gVerify" type="button" style="justify-content:center">Увійти</button><button class="btn ghost sm" id="gBack" type="button">Інша пошта</button></div>
+      <div id="gStep2" class="gbody" hidden><input class="search" id="gCode" inputmode="numeric" autocomplete="off" maxlength="6" pattern="[0-9]{6}" placeholder="6-значний код"><button class="btn primary" id="gVerify" type="button" style="justify-content:center">Увійти</button><button class="btn ghost sm" id="gBack" type="button">Інша пошта</button></div>
     </div>
   </div>
 </div>
@@ -224,21 +228,22 @@
   <div class="modal sheet" role="dialog" aria-modal="true" aria-labelledby="mtS">
     <div class="mh"><h3 id="mtS">Налаштування <button class="btn ghost sm" id="sClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="sMail"></div></div>
     <div class="sbody">
-      <button class="srow" type="button" id="themeOpen"><span>Теми оформлення</span><span aria-hidden="true">›</span></button>
-      <button class="srow" type="button" data-s="colors"><span>Кольори змін</span></button>
-      <button class="srow" type="button" id="settingsContact"><span>Контакти адміністратора</span></button>
-      <button class="srow" type="button" data-s="data" id="sData"><span>Імпорт / Експорт</span></button>
-      <button class="srow" type="button" data-s="adm" id="sAdm" hidden><span>Адмін-панель</span></button>
-      <button class="srow danger" type="button" data-s="out" id="sOut" hidden><span>Вийти</span></button>
+      <button class="srow" type="button" id="themeOpen"><span class="srow-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18V3Z"/></svg>Теми оформлення</span><span aria-hidden="true">›</span></button>
+      <button class="srow" type="button" data-s="colors"><span class="srow-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1.2a2 2 0 0 0 1.4-3.4 1.6 1.6 0 0 1 1.1-2.7H18a3 3 0 0 0 3-3c0-5-4-8.9-9-8.9Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="15" cy="8" r="1"/></svg>Кольори змін</span></button>
+      <button class="srow" type="button" id="settingsContact"><span class="srow-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c.5-4 3.2-6 7.5-6s7 2 7.5 6"/></svg>Контакти адміністратора</span></button>
+      <button class="srow" type="button" data-s="data" id="sData"><span class="srow-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 14v6h16v-6"/></svg>Імпорт / Експорт</span></button>
+      <button class="srow" type="button" data-s="adm" id="sAdm" hidden><span class="srow-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg>Адмін-панель</span></button>
+      <button class="srow danger" type="button" data-s="out" id="sOut" hidden><span class="srow-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4m4-4H9"/></svg>Вийти</span></button>
     </div>
   </div>
 </div>
 <div class="theme-options-overlay" id="themeOverlay" hidden><section class="theme-options-dialog" role="dialog" aria-modal="true" aria-labelledby="themeDialogTitle"><header><b id="themeDialogTitle">Теми оформлення</b><button class="btn ghost sm" id="themeClose" type="button" aria-label="Закрити">✕</button></header><div id="themeOptions" class="theme-options"></div></section></div>
 <div class="zbk" id="zbk" hidden></div>
 <div class="chartp" id="chartP" hidden>
-  <div class="chp-h"><b>Чати по днях</b><span class="sub2" id="chMonth"></span></div>
+  <div class="chp-h"><b>Чати по днях</b><button class="btn chart-move-btn" id="chartMove" type="button" aria-label="Перемістити графік ліворуч" title="Перемістити ліворуч"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg></button><button class="btn chart-close-btn" id="chartClose" type="button" aria-label="Закрити графік" title="Закрити графік"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
   <div id="chSvg"></div>
   <div class="chlg"><span><i class="g"></i>≥ норми</span><span><i class="y"></i>від ½ норми</span><span><i class="r"></i>менше ½ норми</span><span><i class="n"></i>норма за день</span></div>
+  <div class="month-picker-wrap chart-month-wrap"><button class="month-picker" id="chartMonthButton" type="button" aria-label="Обрати місяць графіка" aria-haspopup="true" aria-expanded="false"><span id="chMonth">—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="pop month-picker-pop" id="chartMonthPop" role="group" aria-label="Місяці графіка" hidden></div></div>
 </div>
 <div class="ov" id="ov7" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt7">
@@ -255,9 +260,9 @@
 </div>
 <div class="ov" id="ov6" hidden>
   <div class="modal ftmodal" role="dialog" aria-modal="true" aria-labelledby="mt6">
-    <div class="mh"><h3 id="mt6">Вільний час <button class="btn ghost sm" id="ftClose" type="button" aria-label="Закрити">✕</button></h3><div class="sub2" id="ftMonth"></div></div>
+    <div class="mh"><h3 id="mt6">Вільний час <button class="btn sm ft-fullscreen-close" id="ftClose" type="button" aria-label="Вийти з повноекранного режиму" title="Вийти з повноекранного режиму"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8v8H8zM3 8V3h5m8 0h5v5M3 16v5h5m8 0h5v-5"/></svg></button></h3><div class="sub2" id="ftMonth"></div></div>
     <div class="gbody">
-      <div class="ftop"><div class="otsum"><div><small>Всього за місяць</small><b id="ftSumM">0</b></div><div><small>Середнє за день <span id="ftCnt"></span></small><b id="ftAvg">—</b></div></div>
+      <div class="ftop"><div class="otsum"><div><small>Всього за місяць</small><b id="ftSumM">0</b></div><div><small>Середнє за день</small><b id="ftAvg">—</b></div></div>
       <div class="ftadd"><div class="popwrap"><button class="btn primary sm" id="ftAddDay" type="button">+ Додати день</button><div class="pop" id="ftPop" hidden></div></div></div></div>
     </div>
     <div class="mb" id="ftList"></div>
@@ -270,6 +275,12 @@
     <div class="theme-picker theme-picker-modal"><b>Тема оформлення</b><div id="themeOptionsModal" class="theme-options"></div></div>
     <div class="mf"><span>Зберігається в базі даних</span><button class="btn primary sm" data-close="ov4" type="button">Готово</button></div>
   </div>
+</div>
+<div class="ov wage-info-overlay" id="wageInfoOverlay" hidden>
+  <section class="modal wage-info-dialog" role="dialog" aria-modal="true" aria-label="Пояснення розрахунку зарплати">
+    <header class="wage-info-header"><a class="btn sm" id="wageInfoDownload" href="image/info_wages_pc.png" download aria-label="Завантажити зображення" title="Завантажити"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg></a><div class="wage-info-actions"><button class="btn ghost sm" type="button" data-close="wageInfoOverlay" aria-label="Закрити">✕</button></div></header>
+    <div class="wage-image-scroll" id="wageImageScroll"><picture><source media="(max-width:760px)" srcset="image/info_wages_mobile.png"><img id="wageInfoImage" src="image/info_wages_pc.png" alt="Пояснення розрахунку зарплати та доплат за розрядом"></picture></div>
+  </section>
 </div>
 <div class="toast" id="toast" hidden></div>
 <div class="drop" id="drop" hidden>Відпустіть файли, щоб додати</div>

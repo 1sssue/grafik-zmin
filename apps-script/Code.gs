@@ -116,7 +116,7 @@ function parseCell_(cell) {
   if (start) return { k: 'work', s: start, l: time_(b) || '', b: time_(pause) || '', t: type };
   if (typeof a === 'string') {
     const m = a.trim().match(/^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/);
-    if (m) return { k: 'work', s: m[1].padStart(2, '0') + ':' + m[2], r: m[0].replace(/\s*[-–]\s*/, ' – '), t: type };
+    if (m) return { k: 'work', s: m[1].padStart(2, '0') + ':' + m[2], r: m[0].replace(/\s*[-–]\s*/, ' – '), l: time_(b) || '', b: time_(pause) || '', t: type };
   }
   const text = cell.find(v => typeof v === 'string' && v.trim() && v.trim() !== '-');
   if (!text) return null;
